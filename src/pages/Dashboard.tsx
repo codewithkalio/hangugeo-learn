@@ -1,0 +1,109 @@
+import { useApp } from '@/contexts/AppContext';
+import { Link } from 'react-router-dom';
+import { BookOpen, Zap, Target, TrendingUp, Sparkles, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+export default function Dashboard() {
+  const { data } = useApp();
+
+  const totalCards = data.flashcards.length;
+  const totalAttempts = data.flashcards.reduce((s, c) => s + c.correctCount + c.incorrectCount, 0);
+  const totalCorrect = data.flashcards.reduce((s, c) => s + c.correctCount, 0);
+  const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+  const dueCards = data.flashcards.filter(c => {
+    const total = c.correctCount + c.incorrectCount;
+    return total === 0 || c.correctCount / total < 0.8;
+  }).length;
+
+  const fadeUp = {
+    hidden: { opacity: 0, y: 16 },
+    visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.4 } }),
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Greeting */}
+      <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+              안녕하세요! 👋
+            </h1>
+            <p className="text-muted-foreground mt-1">Ready for today's practice?</p>
+          </div>
+          <div className="soft-card px-4 py-2 flex items-center gap-2">
+            <span className="text-xl">🔥</span>
+            <div className="text-center">
+              <p className="text-lg font-bold font-display text-foreground">{data.streak}</p>
+              <p className="text-[10px] text-muted-foreground font-medium">day streak</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Quick Actions */}
+      <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp} className="grid grid-cols-2 gap-3">
+        <Link to="/drill" className="soft-btn bg-primary text-primary-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
+          <Zap className="h-6 w-6" />
+          <span className="font-display font-bold text-sm">Start Drill</span>
+        </Link>
+        <Link to="/cards/new" className="soft-btn bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
+          <BookOpen className="h-6 w-6" />
+          <span className="font-display font-bold text-sm">Add Flashcard</span>
+        </Link>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-3 gap-3">
+        <div className="soft-card p-4 text-center">
+          <Target className="h-5 w-5 mx-auto text-primary mb-1" />
+          <p className="text-xl font-display font-bold text-foreground">{totalCards}</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Total Cards</p>
+        </div>
+        <div className="soft-card p-4 text-center">
+          <TrendingUp className="h-5 w-5 mx-auto text-success mb-1" />
+          <p className="text-xl font-display font-bold text-foreground">{accuracy}%</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Accuracy</p>
+        </div>
+        <div className="soft-card p-4 text-center">
+          <BookOpen className="h-5 w-5 mx-auto text-accent mb-1" />
+          <p className="text-xl font-display font-bold text-foreground">{dueCards}</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Due Review</p>
+        </div>
+      </motion.div>
+
+      {/* Recent Activity */}
+      {data.drillResults.length > 0 && (
+        <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp}>
+          <h2 className="font-display font-bold text-lg mb-3">Recent Drills</h2>
+          <div className="space-y-2">
+            {data.drillResults.slice(0, 3).map(r => (
+              <div key={r.id} className="soft-card p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{r.direction === 'en-to-kr' ? '🇺🇸 → 🇰🇷' : '🇰🇷 → 🇺🇸'}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold font-display">{r.correctCount}/{r.totalCards}</p>
+                  <p className="text-xs text-muted-foreground">{Math.round((r.correctCount / r.totalCards) * 100)}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* AI Quiz Placeholder */}
+      <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp}>
+        <div className="soft-card p-5 relative overflow-hidden opacity-75">
+          <div className="absolute top-3 right-3 bg-muted text-muted-foreground text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Lock className="h-3 w-3" /> Coming Soon
+          </div>
+          <Sparkles className="h-8 w-8 text-accent mb-2" />
+          <h3 className="font-display font-bold text-foreground">AI Sentence Quiz 🤖</h3>
+          <p className="text-sm text-muted-foreground mt-1">Practice with AI-generated sentences using your flashcard words</p>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

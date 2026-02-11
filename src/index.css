@@ -1,96 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 80 25% 95%;
+    --foreground: 168 90% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 168 90% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 168 90% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 168 90% 20%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 155 40% 40%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 72 30% 82%;
+    --muted-foreground: 168 20% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 22 72% 59%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 3 56% 58%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 72 20% 85%;
+    --input: 72 20% 85%;
+    --ring: 163 55% 45%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 168 90% 20%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 163 55% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 168 70% 28%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 168 60% 25%;
+    --sidebar-ring: 163 55% 45%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --success: 163 55% 45%;
+    --success-foreground: 0 0% 100%;
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --soft-shadow: 6px 6px 16px hsl(168 20% 80% / 0.5), -4px -4px 12px hsl(0 0% 100% / 0.8);
+    --soft-shadow-sm: 3px 3px 8px hsl(168 20% 80% / 0.4), -2px -2px 6px hsl(0 0% 100% / 0.7);
+    --soft-shadow-inset: inset 3px 3px 8px hsl(168 20% 80% / 0.5), inset -2px -2px 6px hsl(0 0% 100% / 0.7);
+    --soft-shadow-pressed: inset 2px 2px 5px hsl(168 20% 80% / 0.6), inset -1px -1px 3px hsl(0 0% 100% / 0.5);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 168 30% 8%;
+    --foreground: 80 20% 92%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 168 25% 12%;
+    --card-foreground: 80 20% 92%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 168 25% 12%;
+    --popover-foreground: 80 20% 92%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 163 55% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 155 40% 35%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 168 15% 20%;
+    --muted-foreground: 80 15% 60%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 22 72% 59%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 3 56% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 168 15% 20%;
+    --input: 168 15% 20%;
+    --ring: 163 55% 45%;
+
+    --sidebar-background: 168 30% 6%;
+    --sidebar-foreground: 80 20% 92%;
+    --sidebar-primary: 163 55% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 168 25% 15%;
+    --sidebar-accent-foreground: 80 20% 92%;
+    --sidebar-border: 168 20% 15%;
+    --sidebar-ring: 163 55% 45%;
+
+    --success: 163 55% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --soft-shadow: 4px 4px 12px hsl(168 30% 4% / 0.6), -3px -3px 10px hsl(168 20% 16% / 0.3);
+    --soft-shadow-sm: 2px 2px 6px hsl(168 30% 4% / 0.5), -1px -1px 4px hsl(168 20% 16% / 0.2);
+    --soft-shadow-inset: inset 2px 2px 6px hsl(168 30% 4% / 0.5), inset -1px -1px 4px hsl(168 20% 16% / 0.2);
+    --soft-shadow-pressed: inset 2px 2px 4px hsl(168 30% 4% / 0.6), inset -1px -1px 2px hsl(168 20% 16% / 0.2);
   }
 }
 
@@ -100,6 +108,51 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+  }
+}
+
+@layer components {
+  .soft-card {
+    background: hsl(var(--card));
+    box-shadow: var(--soft-shadow);
+    border-radius: var(--radius);
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .soft-card:hover {
+    box-shadow: var(--soft-shadow-sm);
+  }
+
+  .soft-card-pressed {
+    box-shadow: var(--soft-shadow-pressed);
+  }
+
+  .soft-inset {
+    box-shadow: var(--soft-shadow-inset);
+    border-radius: var(--radius);
+  }
+
+  .soft-btn {
+    box-shadow: var(--soft-shadow-sm);
+    border-radius: var(--radius);
+    border: none;
+    transition: all 0.15s ease;
+  }
+
+  .soft-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--soft-shadow);
+  }
+
+  .soft-btn:active {
+    transform: translateY(0);
+    box-shadow: var(--soft-shadow-pressed);
   }
 }
