@@ -1,29 +1,32 @@
 
 
-# Add Name Field to Login Page
+# Split Login Page into Sign In / Sign Up States
 
 ## Overview
 
-Add a "Your name" input field to the Magic Link login form. The name will be stored in the user's Supabase Auth metadata (`user_metadata.full_name`) so it's available throughout the app without needing a separate profiles table.
+Convert the login page into a two-tab (or toggle) interface: one for existing users ("Sign In") that only asks for email, and one for new users ("Sign Up") that asks for both name and email. Both use the same Magic Link/OTP flow under the hood.
 
 ## What You'll See
 
-- A new "Your name" text input above the email field on the login page, with a User icon
-- The name is passed to Supabase via `signInWithOtp` metadata and stored on the user record
-- The sidebar will show the user's name instead of (or alongside) their email
+- Two toggle buttons at the top of the login card: "Sign In" and "Sign Up"
+- **Sign In**: Shows only the email field and a "Send Magic Link" button
+- **Sign Up**: Shows both the "Your name" and email fields, then sends the magic link with the name in metadata
+- The confirmation screen ("Check your inbox!") remains the same for both flows
+- A text link below the form to switch between modes (e.g., "Don't have an account? Sign up" / "Already have an account? Sign in")
 
 ## Technical Details
 
-### 1. Update `src/pages/Auth.tsx`
-- Add a `name` state variable
-- Add a name input field (with a User icon) above the email field
-- Pass the name as `data: { full_name: name }` in the `signInWithOtp` options, which Supabase stores in `user_metadata`
-- Require both name and email before enabling the submit button
-- Reset the name field alongside email when user clicks "Use a different email"
+### Update `src/pages/Auth.tsx`
 
-### 2. Update `src/components/DesktopSidebar.tsx`
-- Display `user.user_metadata.full_name` (if available) above the email in the sidebar user section
+- Add an `isSignUp` boolean state (default `false` for Sign In)
+- **Sign In mode**: Hide the name field entirely; call `signInWithOtp({ email, options: { emailRedirectTo } })` without metadata
+- **Sign Up mode**: Show the name field; call `signInWithOtp({ email, options: { emailRedirectTo, data: { full_name: name } } })` with metadata
+- Adjust the submit button disabled logic: Sign In requires only email; Sign Up requires both name and email
+- Add a toggle link below the form to switch between modes, resetting the name field when switching
+- Update the button text to reflect mode: "Send Magic Link" for Sign In, "Create Account" for Sign Up
+- Reset `isSignUp` state alongside other fields when clicking "Use a different email"
 
-### 3. Update `src/components/BottomNav.tsx`
-- No changes needed (it only shows the sign-out button on mobile)
+### No other files need changes
+
+The `AuthContext`, `DesktopSidebar`, `BottomNav`, and `ProtectedRoute` remain unchanged since the underlying auth mechanism (Magic Link OTP) is the same for both flows.
 
