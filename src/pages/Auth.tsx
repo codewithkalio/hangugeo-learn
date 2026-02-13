@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Loader2, CheckCircle2, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
@@ -33,13 +34,15 @@ export default function Auth() {
     setError('');
     setSending(true);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const otpOptions: Parameters<typeof supabase.auth.signInWithOtp>[0] = {
       email,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: name },
+        ...(isSignUp && name ? { data: { full_name: name } } : {}),
       },
-    });
+    };
+
+    const { error } = await supabase.auth.signInWithOtp(otpOptions);
 
     setSending(false);
     if (error) {
@@ -48,6 +51,14 @@ export default function Auth() {
       setSent(true);
     }
   };
+
+  const toggleMode = () => {
+    setIsSignUp((prev) => !prev);
+    setName('');
+    setError('');
+  };
+
+  const isDisabled = sending || !email || (isSignUp && !name);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
@@ -79,61 +90,118 @@ export default function Auth() {
                 <Button
                   variant="ghost"
                   className="mt-4 text-sm"
-                  onClick={() => { setSent(false); setName(''); setEmail(''); }}
+                  onClick={() => { setSent(false); setName(''); setEmail(''); setIsSignUp(false); }}
                 >
                   Use a different email
                 </Button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="name">
-                    Your name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
+              <>
+                {/* Toggle tabs */}
+                <div className="flex rounded-lg bg-muted p-1 mb-6">
+                  <button
+                    type="button"
+                    onClick={() => { setIsSignUp(false); setName(''); setError(''); }}
+                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all ${
+                      !isSignUp
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsSignUp(true); setError(''); }}
+                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all ${
+                      isSignUp
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Sign Up
+                  </button>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground" htmlFor="email">
-                    Email address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <AnimatePresence mode="wait">
+                    {isSignUp && (
+                      <motion.div
+                        key="name-field"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="space-y-2 overflow-hidden"
+                      >
+                        <label className="text-sm font-medium text-foreground" htmlFor="name">
+                          Your name
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="name"
+                            type="text"
+                            placeholder="Your name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="pl-10"
+                            required={isSignUp}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground" htmlFor="email">
+                      Email address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {error && (
-                  <p className="text-sm text-destructive">{error}</p>
-                )}
-
-                <Button type="submit" className="w-full soft-btn" disabled={sending || !email || !name}>
-                  {sending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Send Magic Link ✨'
+                  {error && (
+                    <p className="text-sm text-destructive">{error}</p>
                   )}
-                </Button>
-              </form>
+
+                  <Button type="submit" className="w-full soft-btn" disabled={isDisabled}>
+                    {sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isSignUp ? (
+                      'Create Account ✨'
+                    ) : (
+                      'Send Magic Link ✨'
+                    )}
+                  </Button>
+                </form>
+
+                <p className="text-center text-sm text-muted-foreground mt-4">
+                  {isSignUp ? (
+                    <>Already have an account?{' '}
+                      <button type="button" onClick={toggleMode} className="text-primary font-medium hover:underline">
+                        Sign in
+                      </button>
+                    </>
+                  ) : (
+                    <>Don't have an account?{' '}
+                      <button type="button" onClick={toggleMode} className="text-primary font-medium hover:underline">
+                        Sign up
+                      </button>
+                    </>
+                  )}
+                </p>
+              </>
             )}
           </CardContent>
         </Card>
