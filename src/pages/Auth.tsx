@@ -5,11 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mail, Loader2, CheckCircle2, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -34,7 +35,10 @@ export default function Auth() {
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { full_name: name },
+      },
     });
 
     setSending(false);
@@ -75,13 +79,31 @@ export default function Auth() {
                 <Button
                   variant="ghost"
                   className="mt-4 text-sm"
-                  onClick={() => { setSent(false); setEmail(''); }}
+                  onClick={() => { setSent(false); setName(''); setEmail(''); }}
                 >
                   Use a different email
                 </Button>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground" htmlFor="name">
+                    Your name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground" htmlFor="email">
                     Email address
@@ -104,7 +126,7 @@ export default function Auth() {
                   <p className="text-sm text-destructive">{error}</p>
                 )}
 
-                <Button type="submit" className="w-full soft-btn" disabled={sending || !email}>
+                <Button type="submit" className="w-full soft-btn" disabled={sending || !email || !name}>
                   {sending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (

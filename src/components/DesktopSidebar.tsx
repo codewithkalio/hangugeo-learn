@@ -55,6 +55,9 @@ export function DesktopSidebar() {
         {user && (
           <div className="flex items-center gap-2 px-1">
             <div className="flex-1 min-w-0">
+              {user.user_metadata?.full_name && (
+                <p className="text-sm font-medium text-sidebar-foreground truncate">{user.user_metadata.full_name}</p>
+              )}
               <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
             </div>
             <button
