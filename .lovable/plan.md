@@ -1,73 +1,48 @@
 
 
-# 🇰🇷 Korean Language Learning App
+# Authentication Setup: Magic Link / OTP Login
 
-A beautifully crafted SoftUI language learning experience with soft shadows, rounded elements, and a warm teal-green-coral palette inspired by your colors.
+## Overview
 
----
+Add email-based authentication using Supabase Auth with Magic Link (passwordless). Users enter their email, receive a one-time link/code, and are signed in. All app routes will be protected behind authentication.
 
-## Design System
+## What You'll See
 
-- **SoftUI aesthetic**: Raised/inset card surfaces with soft box shadows, no hard borders, generous rounding, and subtle gradients
-- **Color palette**: Teal greens (#066057, #318067, #4BC1A0) for primary actions, soft sage (#C9D1A5) for backgrounds, warm coral/orange (#E1814C, #D05657) for accents and scoring
-- **Typography**: Clean sans-serif, large friendly headings, playful emoji accents throughout
-- **Microinteractions**: Smooth card flips, fade-in animations, satisfying button presses with scale effects, progress bar animations
+- A beautiful SoftUI login page matching the existing design (teal/sage/coral palette, soft shadows, Korean-themed branding)
+- Email input field with a "Send Magic Link" button
+- After sending, a confirmation message telling users to check their inbox
+- A user menu in the sidebar/nav showing the logged-in email with a sign-out option
+- Automatic redirect to login if not authenticated
 
----
+## Technical Details
 
-## Pages & Features
+### 1. Create Auth Page (`src/pages/Auth.tsx`)
+- SoftUI-styled centered card with the HanGeul branding (flag emoji + app name)
+- Email input + "Send Magic Link" button
+- Loading state while sending
+- Success message after email is sent
+- Uses `supabase.auth.signInWithOtp({ email })` with `emailRedirectTo: window.location.origin`
 
-### 1. Dashboard (Home)
-- Greeting with streak counter and motivational message
-- Quick-start buttons: "Start Drill" and "Add Flashcard"
-- Stats overview cards: total cards, accuracy rate, cards due for review
-- Placeholder card teasing the upcoming "AI Sentence Quiz" feature (locked/coming soon badge)
+### 2. Create Auth Context (`src/contexts/AuthContext.tsx`)
+- `AuthProvider` wrapping the app that listens to `onAuthStateChange`
+- Exposes `session`, `user`, `loading`, and `signOut` values
+- Sets up the auth listener BEFORE calling `getSession()` (per Supabase best practices)
 
-### 2. Flashcard Bank
-- Searchable, filterable list of all flashcards displayed as soft cards
-- Filter by category, sort by date added or accuracy
-- Each card shows Korean word, English translation, category badge, and accuracy indicator
-- Inline delete with confirmation, tap to edit
-- Floating "+" button to add new cards
+### 3. Create Protected Route Wrapper (`src/components/ProtectedRoute.tsx`)
+- Checks if user is authenticated
+- Shows a loading spinner while auth state is resolving
+- Redirects to `/auth` if not logged in
 
-### 3. Add / Edit Flashcard
-- Clean form with Korean and English input fields
-- Dictation button (microphone icon) on each field — uses browser Speech Recognition API to fill in the word via voice
-- Optional category selector (dropdown with ability to create new categories)
-- Save with a satisfying animation
+### 4. Update App.tsx
+- Wrap routes with `AuthProvider`
+- Add `/auth` route for the login page
+- Wrap all other routes with `ProtectedRoute`
 
-### 4. Flashcard Drill
-- Pre-drill setup screen: choose direction (English → Korean or Korean → Korean → English), optionally filter by category
-- Drill view: large centered card with flip animation on tap/click
-- Front shows the prompt word, back reveals the answer
-- "Got it ✅" and "Missed ❌" buttons below the card
-- Progress bar showing position in the deck
-- End-of-drill summary screen with score, accuracy percentage, and breakdown of correct/missed cards
+### 5. Update Navigation (Sidebar + BottomNav)
+- Add user email display and sign-out button to the desktop sidebar (bottom area)
+- Add a small user/sign-out affordance accessible from mobile nav
 
-### 5. Stats / Progress
-- Overall accuracy chart (bar or radial chart)
-- Per-category breakdown
-- Recent drill history with scores
-- "Weakest words" list (lowest accuracy) for targeted review
-
-### 6. AI Sentence Quiz (Placeholder)
-- Locked feature card on the dashboard
-- Dedicated page with a "Coming Soon" illustration and description: "Practice with AI-generated sentences using your flashcard words"
-- Option to "Notify me" (non-functional placeholder button)
-
----
-
-## Layout & Navigation
-
-- Bottom tab bar on mobile (Home, Cards, Drill, Stats) with soft pill-shaped active indicator
-- Sidebar navigation on desktop
-- All pages fully responsive with mobile-first approach
-
----
-
-## Data Storage
-
-- All flashcard data stored in browser localStorage for now (no backend needed)
-- Drill results and accuracy metrics persisted locally
-- Structured so it can easily migrate to a database later
+### 6. Supabase Auth Configuration
+- No database tables needed (using built-in `auth.users` only -- no user profiles table for now)
+- No RLS policies needed yet since data is still in localStorage
 
