@@ -97,31 +97,6 @@ export default function Auth() {
               </motion.div>
             ) : (
               <>
-                {/* Toggle tabs */}
-                <div className="flex rounded-lg bg-muted p-1 mb-6">
-                  <button
-                    type="button"
-                    onClick={() => { setIsSignUp(false); setName(''); setError(''); }}
-                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all ${
-                      !isSignUp
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsSignUp(true); setError(''); }}
-                    className={`flex-1 text-sm font-medium py-2 rounded-md transition-all ${
-                      isSignUp
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    Sign Up
-                  </button>
-                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <AnimatePresence mode="wait">
