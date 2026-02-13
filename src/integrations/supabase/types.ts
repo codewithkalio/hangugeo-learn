@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      drill_results: {
+        Row: {
+          cards: Json
+          category: string | null
+          correct_count: number
+          date: string
+          direction: string
+          id: string
+          total_cards: number
+          user_id: string
+        }
+        Insert: {
+          cards: Json
+          category?: string | null
+          correct_count: number
+          date?: string
+          direction: string
+          id?: string
+          total_cards: number
+          user_id: string
+        }
+        Update: {
+          cards?: Json
+          category?: string | null
+          correct_count?: number
+          date?: string
+          direction?: string
+          id?: string
+          total_cards?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      flashcards: {
+        Row: {
+          category: string | null
+          correct_count: number
+          created_at: string
+          english: string
+          id: string
+          incorrect_count: number
+          korean: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          correct_count?: number
+          created_at?: string
+          english: string
+          id?: string
+          incorrect_count?: number
+          korean: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          correct_count?: number
+          created_at?: string
+          english?: string
+          id?: string
+          incorrect_count?: number
+          korean?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

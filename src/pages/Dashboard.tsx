@@ -1,6 +1,6 @@
 import { useApp } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
-import { BookOpen, Zap, Target, TrendingUp, Sparkles, Lock } from 'lucide-react';
+import { BookOpen, Zap, Target, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Dashboard() {
@@ -30,13 +30,6 @@ export default function Dashboard() {
               안녕하세요! 👋
             </h1>
             <p className="text-muted-foreground mt-1">Ready for today's practice?</p>
-          </div>
-          <div className="soft-card px-4 py-2 flex items-center gap-2">
-            <span className="text-xl">🔥</span>
-            <div className="text-center">
-              <p className="text-lg font-bold font-display text-foreground">{data.streak}</p>
-              <p className="text-[10px] text-muted-foreground font-medium">day streak</p>
-            </div>
           </div>
         </div>
       </motion.div>
@@ -93,17 +86,6 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* AI Quiz Placeholder */}
-      <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp}>
-        <div className="soft-card p-5 relative overflow-hidden opacity-75">
-          <div className="absolute top-3 right-3 bg-muted text-muted-foreground text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-            <Lock className="h-3 w-3" /> Coming Soon
-          </div>
-          <Sparkles className="h-8 w-8 text-accent mb-2" />
-          <h3 className="font-display font-bold text-foreground">AI Sentence Quiz 🤖</h3>
-          <p className="text-sm text-muted-foreground mt-1">Practice with AI-generated sentences using your flashcard words</p>
-        </div>
-      </motion.div>
     </div>
   );
 }
