@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Zap, BarChart3 } from 'lucide-react';
+import { Home, BookOpen, Zap, BarChart3, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const tabs = [
   { to: '/', icon: Home, label: 'Home' },
@@ -11,6 +12,7 @@ const tabs = [
 
 export function BottomNav() {
   const location = useLocation();
+  const { signOut } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
@@ -22,7 +24,7 @@ export function BottomNav() {
               key={to}
               to={to}
               className={cn(
-                'flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl transition-all duration-200 text-xs font-medium',
+                'flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-xs font-medium',
                 active
                   ? 'bg-primary text-primary-foreground scale-105'
                   : 'text-muted-foreground hover:text-foreground'
@@ -33,6 +35,13 @@ export function BottomNav() {
             </NavLink>
           );
         })}
+        <button
+          onClick={signOut}
+          className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <LogOut className="h-5 w-5" />
+          <span>Out</span>
+        </button>
       </div>
     </nav>
   );
