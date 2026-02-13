@@ -12,7 +12,7 @@ import FlashcardBank from "./pages/FlashcardBank";
 import FlashcardForm from "./pages/FlashcardForm";
 import FlashcardDrill from "./pages/FlashcardDrill";
 import Stats from "./pages/Stats";
-import AIQuiz from "./pages/AIQuiz";
+
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -34,7 +34,7 @@ const App = () => (
               <Route path="/cards/edit/:id" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
               <Route path="/drill" element={<ProtectedRoute><AppLayout><FlashcardDrill /></AppLayout></ProtectedRoute>} />
               <Route path="/stats" element={<ProtectedRoute><AppLayout><Stats /></AppLayout></ProtectedRoute>} />
-              <Route path="/ai-quiz" element={<ProtectedRoute><AppLayout><AIQuiz /></AppLayout></ProtectedRoute>} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppProvider>
