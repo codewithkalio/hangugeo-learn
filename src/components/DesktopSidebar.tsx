@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Zap, BarChart3, Sparkles, LogOut } from 'lucide-react';
+import { Home, BookOpen, Zap, BarChart3, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,7 +8,7 @@ const links = [
   { to: '/cards', icon: BookOpen, label: 'Flashcards', emoji: '📚' },
   { to: '/drill', icon: Zap, label: 'Drill', emoji: '⚡' },
   { to: '/stats', icon: BarChart3, label: 'Stats', emoji: '📊' },
-  { to: '/ai-quiz', icon: Sparkles, label: 'AI Quiz', emoji: '🤖' },
+  
 ];
 
 export function DesktopSidebar() {
