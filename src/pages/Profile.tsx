@@ -1,8 +1,8 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
-import Stats from './Stats';
+import { LogOut, BarChart3, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -32,7 +32,11 @@ export default function Profile() {
         </Button>
       </div>
 
-      <Stats />
+      <Link to="/profile/stats" className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors">
+        <BarChart3 className="h-5 w-5 text-primary" />
+        <span className="flex-1 font-medium text-sm">Stats</span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </Link>
     </div>
   );
 }
