@@ -1,45 +1,22 @@
 
 
-# Create Profile Page with Stats as Sub-Page
+# Move Stats to Its Own Sub-Page Under Profile
 
 ## Overview
 
-Create a new Profile page that shows user info (name, email, avatar) and contains the Stats content as a sub-section. The current `/stats` route and its nav entry will be replaced by `/profile`, with Stats embedded within the Profile page.
+Instead of embedding Stats directly on the Profile page, Stats will become its own route (`/profile/stats`) that users navigate to via a button on the Profile page.
 
 ## Changes
 
-### 1. Create `src/pages/Profile.tsx`
-- Display user avatar (initials fallback), name, and email from `useAuth()`
-- Include a sign-out button
-- Render the existing Stats content below the user info section (import and embed the Stats component directly)
+### 1. Update `src/pages/Profile.tsx`
+- Remove the inline `<Stats />` component and its import
+- Add a "Stats" button/link that navigates to `/profile/stats` (using `Link` from react-router-dom)
+- Style it as a menu item card (e.g., a soft-card row with a chart icon, "Stats" label, and a chevron-right indicator)
 
-### 2. Update `src/pages/Stats.tsx`
-- Remove the top-level heading (`h1`) so it fits cleanly as a sub-section within Profile
-- Export remains the same -- Profile will import and render it inline
+### 2. Restore `src/pages/Stats.tsx`
+- Change the `h2` back to `h1` so it works as a standalone page heading again
 
-### 3. Update Routes in `src/App.tsx`
-- Replace `/stats` route with `/profile` pointing to the new Profile page
-- Remove the standalone `/stats` route
-
-### 4. Update Navigation
-- **`src/components/BottomNav.tsx`**: Change the Stats tab to Profile (`/profile`, `User` icon, label "Profile")
-- **`src/components/DesktopSidebar.tsx`**: Change the Stats link to Profile (`/profile`, "Profile" label, user emoji)
-
-## Technical Details
-
-### Profile Page Structure
-```
-Profile Page (/profile)
-+-- User Info Card (avatar, name, email, sign-out)
-+-- Stats Component (embedded directly)
-```
-
-### Files to Create
-- `src/pages/Profile.tsx`
-
-### Files to Modify
-- `src/pages/Stats.tsx` -- remove standalone heading
-- `src/App.tsx` -- swap `/stats` route for `/profile`
-- `src/components/BottomNav.tsx` -- update tab entry
-- `src/components/DesktopSidebar.tsx` -- update sidebar link
+### 3. Update `src/App.tsx`
+- Add a new route: `/profile/stats` pointing to the Stats component (protected, with AppLayout)
+- Re-add the Stats import
 
