@@ -1,41 +1,49 @@
 
 
-# Add Email/Password Dev Login for Non-Production Environments
+# Add Notes Field to Flashcards
 
 ## Overview
 
-Add email + password authentication as a development shortcut. On non-production URLs (Lovable preview and localhost), the Auth page will show a password field so you can sign in instantly without waiting for a magic link email. On production (`hanguk-eo-bloom.lovable.app`), only magic links are shown -- no changes there.
+Add an optional "notes" field to flashcards, stored in Supabase, displayed during drills, and editable when creating/editing cards (max 30 characters).
 
-## How It Works
+## What Changes
 
-- The app checks `window.location.hostname` at runtime
-- If the hostname is the production domain (`hanguk-eo-bloom.lovable.app`), it behaves exactly as it does today (magic link only)
-- Otherwise (Lovable preview URLs, `localhost`), it shows an additional **password field** and uses `supabase.auth.signInWithPassword` / `supabase.auth.signUp` instead of OTP
-- You create one dev account with a password and reuse it -- no email round-trips
-
-## What You Need to Do First
-
-1. **Enable email/password provider** in Supabase: Go to Authentication > Providers > Email and ensure "Enable Email Signup" is on (it likely already is since magic links use the email provider)
-2. **Create a dev user**: After the code is deployed, go to the Auth page in preview, sign up with an email + password, then confirm the user in the Supabase dashboard (Authentication > Users) if email confirmations are enabled. Alternatively, you can disable "Confirm email" in the Supabase email provider settings for faster dev setup.
+- A new "Notes" input appears on the Add/Edit Flashcard form (30 character limit)
+- During drills, the note displays in gray italicized text below the category badge on the answer side of the card
+- No other UI changes
 
 ## Technical Details
 
-### 1. Auth Page (`src/pages/Auth.tsx`)
+### 1. Database Migration
 
-- Add a helper constant: `const isProduction = window.location.hostname === 'hanguk-eo-bloom.lovable.app'`
-- Add a `password` state field
-- When `!isProduction`: render a password input below the email field
-- Change `handleSubmit`:
-  - If `isProduction`: use existing `signInWithOtp` flow (unchanged)
-  - If `!isProduction` and `isSignUp`: use `supabase.auth.signUp({ email, password, options: { data: { full_name: name } } })`
-  - If `!isProduction` and `!isSignUp`: use `supabase.auth.signInWithPassword({ email, password })`
-- On successful password sign-in, the `AuthContext` picks up the session automatically via `onAuthStateChange` -- no additional changes needed
-- Hide the "Check your inbox" confirmation screen for password flow (sign-in is instant)
+Add a nullable `note` column to the `flashcards` table:
 
-### 2. No Changes Needed
+```sql
+ALTER TABLE flashcards ADD COLUMN note text;
+```
 
-- **AuthContext** -- no changes, it already listens for any auth state change
-- **ProtectedRoute** -- no changes
-- **Database / RLS** -- no changes, `auth.uid()` works regardless of sign-in method
-- **Production behavior** -- completely unchanged
+### 2. Type Definition (`src/lib/types.ts`)
+
+Add `note?: string` to the `Flashcard` interface.
+
+### 3. Data Hook (`src/hooks/useAppData.ts`)
+
+- Map `row.note` in the flashcards query
+- Include `note` in `addFlashcard` insert and `updateFlashcard` update mutations
+
+### 4. Flashcard Form (`src/pages/FlashcardForm.tsx`)
+
+- Add `note` state, pre-populated from existing card when editing
+- Add a new input field labeled "Notes (optional)" with `maxLength={30}` and a character counter
+- Pass `note` through to `addFlashcard` / `updateFlashcard`
+
+### 5. Flashcard Drill (`src/pages/FlashcardDrill.tsx`)
+
+- On the flipped (answer) side of the card, render the note below the category badge:
+  ```tsx
+  {flipped && currentCard.note && (
+    <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
+  )}
+  ```
+- The note only shows on the answer side, regardless of drill direction
 
