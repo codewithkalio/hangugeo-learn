@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, ChevronRight } from 'lucide-react';
+import { LogOut, BarChart3, Upload, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import CsvImport from '@/pages/CsvImport';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
+  const [csvOpen, setCsvOpen] = useState(false);
 
   const name = user?.user_metadata?.full_name || '';
   const email = user?.email || '';
@@ -37,6 +40,14 @@ export default function Profile() {
         <span className="flex-1 font-medium text-sm">Stats</span>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </Link>
+
+      <button onClick={() => setCsvOpen(true)} className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors w-full text-left">
+        <Upload className="h-5 w-5 text-primary" />
+        <span className="flex-1 font-medium text-sm">Import CSV</span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </button>
+
+      <CsvImport open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
   );
 }
