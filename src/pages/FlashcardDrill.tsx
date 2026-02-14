@@ -201,11 +201,7 @@ export default function FlashcardDrill() {
         onClick={() => setFlipped(!flipped)}
         whileTap={{ scale: 0.98 }}
       >
-        <motion.div
-          key={`${flipped}-${currentIndex}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.15 }}
+        <div
           className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center"
         >
           <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
@@ -220,7 +216,7 @@ export default function FlashcardDrill() {
           {flipped && currentCard.note && (
             <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
           )}
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Answer Buttons */}
