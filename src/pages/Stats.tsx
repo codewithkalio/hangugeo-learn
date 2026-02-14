@@ -34,7 +34,7 @@ export default function Stats() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-bold">📊 Stats</h1>
+      <h2 className="text-lg font-display font-bold">📊 Stats</h2>
 
       {/* Overview */}
       <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="grid grid-cols-3 gap-3">
