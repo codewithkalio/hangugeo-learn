@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, X, RotateCcw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -201,29 +201,26 @@ export default function FlashcardDrill() {
         onClick={() => setFlipped(!flipped)}
         whileTap={{ scale: 0.98 }}
       >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={flipped ? 'back' : 'front'}
-            initial={{ rotateY: 90, opacity: 0 }}
-            animate={{ rotateY: 0, opacity: 1 }}
-            exit={{ rotateY: -90, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center"
-          >
-            <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
-            <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
-              {flipped ? back : front}
-            </p>
-            {flipped && currentCard.category && (
-              <Badge variant="secondary" className="mt-3 bg-muted text-muted-foreground border-none text-xs">
-                {currentCard.category}
-              </Badge>
-            )}
-            {flipped && currentCard.note && (
-              <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          key={`${flipped}-${currentIndex}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.15 }}
+          className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center"
+        >
+          <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
+          <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
+            {flipped ? back : front}
+          </p>
+          {flipped && currentCard.category && (
+            <Badge variant="secondary" className="mt-3 bg-muted text-muted-foreground border-none text-xs">
+              {currentCard.category}
+            </Badge>
+          )}
+          {flipped && currentCard.note && (
+            <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
+          )}
+        </motion.div>
       </motion.div>
 
       {/* Answer Buttons */}
