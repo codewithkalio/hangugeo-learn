@@ -219,6 +219,9 @@ export default function FlashcardDrill() {
                 {currentCard.category}
               </Badge>
             )}
+            {flipped && currentCard.note && (
+              <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
+            )}
           </motion.div>
         </AnimatePresence>
       </motion.div>

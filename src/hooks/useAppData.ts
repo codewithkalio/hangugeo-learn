@@ -25,6 +25,7 @@ export function useAppData() {
         korean: row.korean,
         english: row.english,
         category: row.category ?? undefined,
+        note: (row as any).note ?? undefined,
         createdAt: row.created_at,
         correctCount: row.correct_count,
         incorrectCount: row.incorrect_count,
@@ -86,7 +87,7 @@ export function useAppData() {
     mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount'>) => {
       const { data, error } = await supabase
         .from('flashcards')
-        .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null } as any)
+        .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
         .select()
         .single();
       if (error) throw error;
@@ -101,6 +102,7 @@ export function useAppData() {
       if (updates.korean !== undefined) mapped.korean = updates.korean;
       if (updates.english !== undefined) mapped.english = updates.english;
       if (updates.category !== undefined) mapped.category = updates.category ?? null;
+      if (updates.note !== undefined) mapped.note = updates.note ?? null;
       const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
       if (error) throw error;
     },
