@@ -140,10 +140,10 @@ export default function FlashcardForm() {
               value={note}
               onChange={e => setNote(e.target.value)}
               placeholder="Add a short note..."
-              maxLength={30}
+              maxLength={65}
               className="soft-inset border-none bg-background text-lg pr-12"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/30</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/65</span>
           </div>
         </div>
 
