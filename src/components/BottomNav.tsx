@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Zap, BarChart3, LogOut } from 'lucide-react';
+import { Home, BookOpen, Zap, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -7,7 +7,7 @@ const tabs = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/cards', icon: BookOpen, label: 'Cards' },
   { to: '/drill', icon: Zap, label: 'Drill' },
-  { to: '/stats', icon: BarChart3, label: 'Stats' },
+  { to: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function BottomNav() {
