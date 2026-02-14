@@ -1,24 +1,45 @@
 
 
-# Fix Flashcard Flip Flash (For Real This Time)
+# Create Profile Page with Stats as Sub-Page
 
-## Root Cause
+## Overview
 
-The current approach uses a `key` prop that changes on flip (`key={\`${flipped}-${currentIndex}\`}`). When a React key changes, the element is **unmounted and remounted**. This means for at least one frame, the old card is gone and the new one hasn't rendered yet -- causing the visible flash. No amount of opacity tweaking fixes this because the DOM node itself is being destroyed and recreated.
+Create a new Profile page that shows user info (name, email, avatar) and contains the Stats content as a sub-section. The current `/stats` route and its nav entry will be replaced by `/profile`, with Stats embedded within the Profile page.
 
-## Solution
+## Changes
 
-Remove all motion/animation from the card flip entirely. Keep a single stable DOM element that never unmounts, and simply swap its text content based on the `flipped` state. The content change is instant with no intermediate blank frame.
+### 1. Create `src/pages/Profile.tsx`
+- Display user avatar (initials fallback), name, and email from `useAuth()`
+- Include a sign-out button
+- Render the existing Stats content below the user info section (import and embed the Stats component directly)
 
-The answer buttons below the card already have their own fade-in animation, so the flip still feels responsive.
+### 2. Update `src/pages/Stats.tsx`
+- Remove the top-level heading (`h1`) so it fits cleanly as a sub-section within Profile
+- Export remains the same -- Profile will import and render it inline
+
+### 3. Update Routes in `src/App.tsx`
+- Replace `/stats` route with `/profile` pointing to the new Profile page
+- Remove the standalone `/stats` route
+
+### 4. Update Navigation
+- **`src/components/BottomNav.tsx`**: Change the Stats tab to Profile (`/profile`, `User` icon, label "Profile")
+- **`src/components/DesktopSidebar.tsx`**: Change the Stats link to Profile (`/profile`, "Profile" label, user emoji)
 
 ## Technical Details
 
-### File: `src/pages/FlashcardDrill.tsx` (lines 198-224)
+### Profile Page Structure
+```
+Profile Page (/profile)
++-- User Info Card (avatar, name, email, sign-out)
++-- Stats Component (embedded directly)
+```
 
-Replace the nested `motion.div` structure with a single stable `div`:
+### Files to Create
+- `src/pages/Profile.tsx`
 
-- Remove the inner `motion.div` with the `key`, `initial`, `animate`, and `transition` props
-- Replace it with a plain `div` (same classes, no key, no animation)
-- The outer `motion.div` wrapper (with `whileTap={{ scale: 0.98 }}`) stays for the tap feedback
-- All content rendering (front/back text, category badge, note) remains unchanged
+### Files to Modify
+- `src/pages/Stats.tsx` -- remove standalone heading
+- `src/App.tsx` -- swap `/stats` route for `/profile`
+- `src/components/BottomNav.tsx` -- update tab entry
+- `src/components/DesktopSidebar.tsx` -- update sidebar link
+
