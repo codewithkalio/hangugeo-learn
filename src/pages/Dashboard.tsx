@@ -61,30 +61,10 @@ export default function Dashboard() {
         <div className="soft-card p-4 text-center">
           <BookOpen className="h-5 w-5 mx-auto text-accent mb-1" />
           <p className="text-xl font-display font-bold text-foreground">{dueCards}</p>
-          <p className="text-[10px] text-muted-foreground font-medium">Due Review</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Due for Review</p>
         </div>
       </motion.div>
 
-      {/* Recent Activity */}
-      {data.drillResults.length > 0 && (
-        <motion.div initial="hidden" animate="visible" custom={3} variants={fadeUp}>
-          <h2 className="font-display font-bold text-lg mb-3">Recent Drills</h2>
-          <div className="space-y-2">
-            {data.drillResults.slice(0, 3).map(r => (
-              <div key={r.id} className="soft-card p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{r.direction === 'en-to-kr' ? '🇺🇸 → 🇰🇷' : '🇰🇷 → 🇺🇸'}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold font-display">{r.correctCount}/{r.totalCards}</p>
-                  <p className="text-xs text-muted-foreground">{Math.round((r.correctCount / r.totalCards) * 100)}%</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
 
     </div>
   );

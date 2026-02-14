@@ -47,11 +47,6 @@ export function DesktopSidebar() {
       </nav>
 
       <div className="mt-auto px-3 py-4 space-y-3">
-        <div className="soft-card p-3 bg-sidebar-accent/30 rounded-xl">
-          <p className="text-xs text-sidebar-foreground/60 font-medium">💡 Tip of the day</p>
-          <p className="text-xs text-sidebar-foreground/80 mt-1">Practice 10 cards daily to build lasting memory!</p>
-        </div>
-
         {user && (
           <div className="flex items-center gap-2 px-1">
             <div className="flex-1 min-w-0">

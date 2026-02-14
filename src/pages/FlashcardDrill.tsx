@@ -10,14 +10,14 @@ import {
 } from '@/components/ui/select';
 
 type DrillPhase = 'setup' | 'drill' | 'summary';
-type Direction = 'en-to-kr' | 'kr-to-en';
+type Direction =  'kr-to-en' | 'en-to-kr';
 
 export default function FlashcardDrill() {
   const { data, addDrillResult } = useApp();
   const navigate = useNavigate();
 
   const [phase, setPhase] = useState<DrillPhase>('setup');
-  const [direction, setDirection] = useState<Direction>('en-to-kr');
+  const [direction, setDirection] = useState<Direction>('kr-to-en');
   const [filterCat, setFilterCat] = useState('all');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -78,7 +78,7 @@ export default function FlashcardDrill() {
           <div className="space-y-2">
             <label className="font-display font-bold text-sm">Direction</label>
             <div className="grid grid-cols-2 gap-2">
-              {(['en-to-kr', 'kr-to-en'] as Direction[]).map(d => (
+              {(['kr-to-en', 'en-to-kr'] as Direction[]).map(d => (
                 <button
                   key={d}
                   onClick={() => setDirection(d)}

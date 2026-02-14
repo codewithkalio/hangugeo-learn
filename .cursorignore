@@ -1,0 +1,12 @@
+# Environment files
+.env
+.env.local
+.env.*
+
+# Configuration files
+# config/secrets.yml
+# **/credentials.json
+
+# Other sensitive files
+# **/private/*
+# **/secrets/*
