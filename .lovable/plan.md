@@ -1,49 +1,23 @@
 
+# Smooth the Flashcard Flip Transition
 
-# Add Notes Field to Flashcards
+## Problem
 
-## Overview
+The current flip uses `AnimatePresence mode="wait"` with `rotateY` and `opacity` changes. This causes the old content to animate out (fade + rotate) and then the new content to animate in (fade + rotate), producing a visible flash/flicker.
 
-Add an optional "notes" field to flashcards, stored in Supabase, displayed during drills, and editable when creating/editing cards (max 30 characters).
+## Solution
 
-## What Changes
-
-- A new "Notes" input appears on the Add/Edit Flashcard form (30 character limit)
-- During drills, the note displays in gray italicized text below the category badge on the answer side of the card
-- No other UI changes
+Replace the unmount/remount animation with a simple in-place crossfade. Instead of using `AnimatePresence` with keyed elements (which unmounts one and mounts another), we keep a single card element and just animate its content opacity when flipping.
 
 ## Technical Details
 
-### 1. Database Migration
+### File: `src/pages/FlashcardDrill.tsx` (lines 198-227)
 
-Add a nullable `note` column to the `flashcards` table:
+Remove `AnimatePresence` and the keyed `motion.div` inside. Replace with a single `motion.div` card that stays mounted, and use a simple opacity transition on the text content:
 
-```sql
-ALTER TABLE flashcards ADD COLUMN note text;
-```
+- Remove `AnimatePresence mode="wait"` wrapper
+- Remove the `key={flipped ? 'back' : 'front'}` inner `motion.div` with `rotateY` animations
+- Keep the outer `motion.div` with `whileTap` and add a subtle `scale` or short opacity animation via `animate={{ opacity: 1 }}` with `key={flipped}` if needed
+- Use a single `motion.div` for the card body, and swap text content based on `flipped` state with a quick fade using `animate={{ opacity: 1 }}` and `initial={{ opacity: 0 }}` with a short 150ms duration -- or simply drop the animation to just an instant swap (no flash at all)
 
-### 2. Type Definition (`src/lib/types.ts`)
-
-Add `note?: string` to the `Flashcard` interface.
-
-### 3. Data Hook (`src/hooks/useAppData.ts`)
-
-- Map `row.note` in the flashcards query
-- Include `note` in `addFlashcard` insert and `updateFlashcard` update mutations
-
-### 4. Flashcard Form (`src/pages/FlashcardForm.tsx`)
-
-- Add `note` state, pre-populated from existing card when editing
-- Add a new input field labeled "Notes (optional)" with `maxLength={30}` and a character counter
-- Pass `note` through to `addFlashcard` / `updateFlashcard`
-
-### 5. Flashcard Drill (`src/pages/FlashcardDrill.tsx`)
-
-- On the flipped (answer) side of the card, render the note below the category badge:
-  ```tsx
-  {flipped && currentCard.note && (
-    <p className="mt-2 text-sm text-muted-foreground italic">{currentCard.note}</p>
-  )}
-  ```
-- The note only shows on the answer side, regardless of drill direction
-
+The simplest reliable approach: replace the `AnimatePresence` block with a single static card `div` and use `motion.div` with `key={flipped + '-' + currentIndex}` and only an opacity fade (no rotateY), with a short 150ms duration. This prevents the double-animation flash.
