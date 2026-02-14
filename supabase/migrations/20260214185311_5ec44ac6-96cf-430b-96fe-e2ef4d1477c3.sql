@@ -1,0 +1,1 @@
+ALTER TABLE flashcards ADD COLUMN note text;

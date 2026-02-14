@@ -20,6 +20,7 @@ export default function FlashcardForm() {
   const [korean, setKorean] = useState(existing?.korean || '');
   const [english, setEnglish] = useState(existing?.english || '');
   const [category, setCategory] = useState(existing?.category || '');
+  const [note, setNote] = useState(existing?.note || '');
   const [newCategory, setNewCategory] = useState('');
   const [listening, setListening] = useState<'korean' | 'english' | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -68,11 +69,13 @@ export default function FlashcardForm() {
       addCategory(newCategory.trim());
     }
 
+    const finalNote = note.trim() || undefined;
+
     if (isEdit && id) {
-      updateFlashcard(id, { korean: korean.trim(), english: english.trim(), category: finalCategory || undefined });
+      updateFlashcard(id, { korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
       toast.success('Card updated! ✏️');
     } else {
-      addFlashcard({ korean: korean.trim(), english: english.trim(), category: finalCategory || undefined });
+      addFlashcard({ korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
       toast.success('Card created! 🎉');
     }
 
@@ -126,6 +129,21 @@ export default function FlashcardForm() {
             >
               {listening === 'english' ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
             </button>
+          </div>
+        </div>
+
+        {/* Note */}
+        <div className="space-y-2">
+          <Label className="font-display font-bold text-sm">📝 Note (optional)</Label>
+          <div className="relative">
+            <Input
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Add a short note..."
+              maxLength={30}
+              className="soft-inset border-none bg-background text-lg pr-12"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/30</span>
           </div>
         </div>
 

@@ -3,6 +3,7 @@ export interface Flashcard {
   korean: string;
   english: string;
   category?: string;
+  note?: string;
   createdAt: string;
   correctCount: number;
   incorrectCount: number;
