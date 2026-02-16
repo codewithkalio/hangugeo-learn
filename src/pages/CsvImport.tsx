@@ -157,7 +157,7 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
         <DialogHeader>
           <DialogTitle>Import Flashcards from CSV</DialogTitle>
           <DialogDescription>
-            Upload a CSV file with columns: korean, english, category, note.
+            Upload a CSV file with columns: Korean, English, Category, Note.
           </DialogDescription>
         </DialogHeader>
 

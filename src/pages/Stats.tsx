@@ -1,5 +1,7 @@
 import { useApp } from '@/contexts/AppContext';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function Stats() {
@@ -34,7 +36,12 @@ export default function Stats() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-bold">📊 Stats</h1>
+      <div className="flex items-center gap-3">
+        <Link to="/settings" className="soft-btn p-2 rounded-xl" aria-label="Back to Settings">
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-2xl font-display font-bold">📊 Stats</h1>
+      </div>
 
       {/* Overview */}
       <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp} className="grid grid-cols-3 gap-3">
