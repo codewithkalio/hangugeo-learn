@@ -18,7 +18,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-bold">👤 Settings</h1>
+      <h1 className="text-2xl font-display font-bold">⚙️ Settings</h1>
 
       <div className="soft-card p-5 flex items-center gap-4">
         <Avatar className="h-14 w-14">

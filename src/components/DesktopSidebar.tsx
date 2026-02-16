@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Zap, BarChart3, LogOut } from 'lucide-react';
+import { Home, BookOpen, Zap, BarChart3, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -7,7 +7,7 @@ const links = [
   { to: '/', icon: Home, label: 'Home', emoji: '🏠' },
   { to: '/cards', icon: BookOpen, label: 'Flashcards', emoji: '📚' },
   { to: '/drill', icon: Zap, label: 'Drill', emoji: '⚡' },
-  { to: '/settings', icon: BarChart3, label: 'Settings', emoji: '👤' },
+  { to: '/settings', icon: Settings, label: 'Settings', emoji: '⚙️' },
   
 ];
 
