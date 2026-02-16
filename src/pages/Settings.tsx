@@ -6,7 +6,7 @@ import { LogOut, BarChart3, Upload, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CsvImport from '@/pages/CsvImport';
 
-export default function Profile() {
+export default function Settings() {
   const { user, signOut } = useAuth();
   const [csvOpen, setCsvOpen] = useState(false);
 
@@ -18,7 +18,7 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-bold">👤 Profile</h1>
+      <h1 className="text-2xl font-display font-bold">👤 Settings</h1>
 
       <div className="soft-card p-5 flex items-center gap-4">
         <Avatar className="h-14 w-14">
@@ -35,7 +35,7 @@ export default function Profile() {
         </Button>
       </div>
 
-      <Link to="/profile/stats" className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors">
+      <Link to="/settings/stats" className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors">
         <BarChart3 className="h-5 w-5 text-primary" />
         <span className="flex-1 font-medium text-sm">Stats</span>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />

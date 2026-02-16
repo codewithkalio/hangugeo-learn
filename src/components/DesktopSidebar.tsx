@@ -7,7 +7,7 @@ const links = [
   { to: '/', icon: Home, label: 'Home', emoji: '🏠' },
   { to: '/cards', icon: BookOpen, label: 'Flashcards', emoji: '📚' },
   { to: '/drill', icon: Zap, label: 'Drill', emoji: '⚡' },
-  { to: '/profile', icon: BarChart3, label: 'Profile', emoji: '👤' },
+  { to: '/settings', icon: BarChart3, label: 'Settings', emoji: '👤' },
   
 ];
 

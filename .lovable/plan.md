@@ -4,11 +4,11 @@
 
 ## Overview
 
-Add a CSV import flow from the Profile page. The user uploads a CSV with `korean, english, category, note` columns. Before importing, a dialog asks how to handle duplicates. All input is sanitized to prevent injection attacks.
+Add a CSV import flow from the Settings page. The user uploads a CSV with `korean, english, category, note` columns. Before importing, a dialog asks how to handle duplicates. All input is sanitized to prevent injection attacks.
 
 ## User Flow
 
-1. User taps "Import CSV" on the Profile page
+1. User taps "Import CSV" on the Settings page
 2. A dialog opens with a file input for selecting a `.csv` file
 3. After selecting a file, the dialog parses and validates it client-side, showing a summary (e.g., "12 cards found, 3 duplicates")
 4. A radio group asks: "How should we handle duplicates?" with two options:
@@ -50,7 +50,7 @@ A dialog component containing:
   - Invalidates the flashcards query cache
 - Toast notification with results
 
-### Modified File: `src/pages/Profile.tsx`
+### Modified File: `src/pages/Settings.tsx`
 
 - Add an "Import CSV" menu item below the Stats link (same card style with `Upload` icon and chevron)
 - Clicking it opens the `CsvImport` dialog via state toggle
