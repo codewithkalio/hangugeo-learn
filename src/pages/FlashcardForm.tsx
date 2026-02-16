@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Mic, MicOff, Save } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
@@ -22,41 +22,6 @@ export default function FlashcardForm() {
   const [category, setCategory] = useState(existing?.category || '');
   const [note, setNote] = useState(existing?.note || '');
   const [newCategory, setNewCategory] = useState('');
-  const [listening, setListening] = useState<'korean' | 'english' | null>(null);
-  const recognitionRef = useRef<any>(null);
-
-  const startDictation = (field: 'korean' | 'english') => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error('Speech recognition not supported in this browser');
-      return;
-    }
-
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(null);
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = field === 'korean' ? 'ko-KR' : 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      if (field === 'korean') setKorean(transcript);
-      else setEnglish(transcript);
-      setListening(null);
-    };
-
-    recognition.onerror = () => setListening(null);
-    recognition.onend = () => setListening(null);
-
-    recognition.start();
-    recognitionRef.current = recognition;
-    setListening(field);
-  };
 
   const handleSave = () => {
     if (!korean.trim() || !english.trim()) {
@@ -97,39 +62,23 @@ export default function FlashcardForm() {
         {/* Korean Field */}
         <div className="space-y-2">
           <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
-          <div className="flex gap-2">
-            <Input
-              value={korean}
-              onChange={e => setKorean(e.target.value)}
-              placeholder="한국어 단어..."
-              className="soft-inset border-none bg-background flex-1 text-lg"
-            />
-            <button
-              onClick={() => startDictation('korean')}
-              className={`soft-btn p-3 rounded-xl transition-colors ${listening === 'korean' ? 'bg-destructive text-destructive-foreground' : 'bg-card'}`}
-            >
-              {listening === 'korean' ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </button>
-          </div>
+          <Input
+            value={korean}
+            onChange={e => setKorean(e.target.value)}
+            placeholder="한국어 단어..."
+            className="soft-inset border-none bg-background text-lg"
+          />
         </div>
 
         {/* English Field */}
         <div className="space-y-2">
           <Label className="font-display font-bold text-sm">🇺🇸 English</Label>
-          <div className="flex gap-2">
-            <Input
-              value={english}
-              onChange={e => setEnglish(e.target.value)}
-              placeholder="English word..."
-              className="soft-inset border-none bg-background flex-1 text-lg"
-            />
-            <button
-              onClick={() => startDictation('english')}
-              className={`soft-btn p-3 rounded-xl transition-colors ${listening === 'english' ? 'bg-destructive text-destructive-foreground' : 'bg-card'}`}
-            >
-              {listening === 'english' ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-            </button>
-          </div>
+          <Input
+            value={english}
+            onChange={e => setEnglish(e.target.value)}
+            placeholder="English word..."
+            className="soft-inset border-none bg-background text-lg"
+          />
         </div>
 
         {/* Note */}
