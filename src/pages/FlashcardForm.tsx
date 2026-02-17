@@ -118,21 +118,6 @@ export default function FlashcardForm() {
           />
         </div>
 
-        {/* Note */}
-        <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">📝 Note (optional)</Label>
-          <div className="relative">
-            <Input
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="Add a short note..."
-              maxLength={65}
-              className="soft-inset border-none bg-background text-lg pr-12"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/65</span>
-          </div>
-        </div>
-
         {/* Category */}
         <div className="space-y-2">
           <Label className="font-display font-bold text-sm">📁 Category (optional)</Label>
@@ -157,6 +142,23 @@ export default function FlashcardForm() {
             />
           )}
         </div>
+
+        {/* Note */}
+        <div className="space-y-2">
+          <Label className="font-display font-bold text-sm">📝 Note (optional)</Label>
+          <div className="relative">
+            <Input
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="Add a short note..."
+              maxLength={65}
+              className="soft-inset border-none bg-background text-lg pr-12"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/65</span>
+          </div>
+        </div>
+
+        
 
         {/* Save Button */}
         <motion.button
