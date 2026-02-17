@@ -1,11 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, HelpCircle, Brain, FolderOpen } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Brain, FolderOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -311,22 +310,7 @@ export default function FlashcardDrill() {
       {/* Confidence Buttons */}
       {flipped && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-          <div className="flex items-center justify-center gap-1">
-            <p className="text-xs text-muted-foreground font-medium">Rate your confidence</p>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[240px] text-xs">
-                  <p><strong>1 — No idea:</strong> No recall at all</p>
-                  <p><strong>2 — Familiar:</strong> Seen it but couldn't retrieve</p>
-                  <p><strong>3 — Got it:</strong> Recalled with some effort</p>
-                  <p><strong>4 — Fluent:</strong> Knew it instantly</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <p className="text-xs text-muted-foreground font-medium text-center">Rate your confidence</p>
           <div className="grid grid-cols-4 gap-2">
             {CONFIDENCE_OPTIONS.map(opt => (
               <motion.button
