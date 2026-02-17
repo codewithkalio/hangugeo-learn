@@ -1,78 +1,92 @@
 
 
-# CSV Import Feature with Input Sanitization
+# Implement Spaced Repetition (CBR Algorithm) -- Keeping Direction
 
 ## Overview
 
-Add a CSV import flow from the Settings page. The user uploads a CSV with `korean, english, category, note` columns. Before importing, a dialog asks how to handle duplicates. All input is sanitized to prevent injection attacks.
+Replace the binary correct/incorrect drill with a confidence-based repetition algorithm. Users rate confidence 1-4 after each card. Cards get weights controlling how often they appear. Direction (Korean-to-English or English-to-Korean) remains as a secondary option below the session mode selector.
 
-## User Flow
+## Database Migration
 
-1. User taps "Import CSV" on the Settings page
-2. A dialog opens with a file input for selecting a `.csv` file
-3. After selecting a file, the dialog parses and validates it client-side, showing a summary (e.g., "12 cards found, 3 duplicates")
-4. A radio group asks: "How should we handle duplicates?" with two options:
-   - Keep original (skip duplicates)
-   - Keep CSV version (overwrite category/note of existing card)
-5. User confirms, import runs
-6. A toast shows the result (e.g., "Imported 9 new cards, skipped 3 duplicates")
+Add three columns to `flashcards`:
 
-## Input Sanitization
+- `confidence_score` integer NOT NULL DEFAULT 0
+- `weight` integer NOT NULL DEFAULT 4
+- `consecutive_fluent` integer NOT NULL DEFAULT 0
 
-Every field from the CSV will be validated and sanitized before it touches the database:
+No changes to `drill_results` schema (the `cards` JSONB column format changes from `{ cardId, correct }` to `{ cardId, confidence }` but no migration needed).
 
-- **Strip HTML/script tags**: Remove any `<script>`, `<img onerror=...>`, event handler attributes, and other HTML tags using a regex strip pass
-- **Length limits**: `korean` and `english` capped at 500 characters, `category` at 100 characters, `note` at 1000 characters
-- **Trim whitespace**: All fields trimmed of leading/trailing whitespace
-- **Reject empty required fields**: Rows missing `korean` or `english` after sanitization are skipped
-- **Zod validation**: Each row is validated through a zod schema before insertion
-- **Supabase parameterized queries**: The Supabase SDK already uses parameterized queries, which prevents SQL injection by design -- but the sanitization above catches XSS and other payload types
+## Files to Modify
 
-A dedicated `sanitizeCsvRow` utility function will handle the cleaning, and a `csvRowSchema` zod schema will enforce the constraints.
+### 1. `src/lib/types.ts`
 
-## Technical Details
+- Add `confidenceScore`, `weight`, `consecutiveFluent` to `Flashcard`
+- Change `DrillResult.cards` type to `{ cardId: string; confidence: number }[]`
+- Replace `correctCount` in `DrillResult` with computed values downstream
 
-### New File: `src/pages/CsvImport.tsx`
+### 2. `src/hooks/useAppData.ts`
 
-A dialog component containing:
+- Map new columns in flashcard query (`confidence_score`, `weight`, `consecutive_fluent`)
+- Rewrite `addDrillResultMut`:
+  - Store `{ cardId, confidence }` format
+  - Post-session: update each card's `weight = 5 - confidence`, `confidence_score`, and `consecutive_fluent`
+  - If `consecutive_fluent >= 5`, set weight to near-zero (0.5 rounded to 1)
 
-- File input accepting `.csv` only
-- Client-side CSV parser (split-based, supports quoted fields)
-- Header validation (must contain `korean` and `english` columns, case-insensitive)
-- Sanitization pass on every parsed row using the utility function
-- Duplicate detection against existing flashcards from `useAppData`
-- Summary display (new count, duplicate count, skipped/invalid count)
-- Radio group for duplicate handling
-- Import button that:
-  - Inserts new rows via `supabase.from('flashcards').insert(...)`
-  - For "keep CSV" mode, updates duplicates via `supabase.from('flashcards').update(...)`
-  - Seeds any new categories via `addCategory`
-  - Invalidates the flashcards query cache
-- Toast notification with results
+### 3. `src/pages/FlashcardDrill.tsx` -- Full Rewrite
 
-### Modified File: `src/pages/Settings.tsx`
+**Setup phase:**
+- Primary selector: "Smart Session" vs "Category Focus" (two big buttons)
+- If Category Focus, show category dropdown
+- Secondary selector (below): Direction toggle -- Korean-to-English or English-to-Korean (same two-button row as today)
+- Card count summary and Start button
 
-- Add an "Import CSV" menu item below the Stats link (same card style with `Upload` icon and chevron)
-- Clicking it opens the `CsvImport` dialog via state toggle
+**Drill phase:**
+- Weighted random card selection from remaining pool (no sequential index)
+- Tap-to-flip card display (same as today, respecting chosen direction)
+- After flip, show 4 confidence buttons instead of binary Missed/Got it:
+  - 1: "No idea" -- red tint
+  - 2: "Familiar" -- orange tint
+  - 3: "Got it" -- blue tint
+  - 4: "Fluent" -- green tint
+- Tooltip icon next to the rating buttons explaining the scale
+- Brief animated label after rating (e.g., "Will appear very frequently" for 1, "Will surface rarely" for 4)
+- Card removed from pool after rating; next card drawn by weight
+- Progress shows remaining cards count
 
-### Sanitization Details
+**Summary phase:**
+- Confidence distribution: how many cards rated 1, 2, 3, 4
+- "Review these" section for cards rated 1 or 2
+- Again / Done buttons
+
+### 4. `src/pages/Dashboard.tsx`
+
+- "Due for Review" counts cards with `weight >= 3`
+- Accuracy/progress stat shows average confidence or percentage of cards at confidence 3+
+
+## Weighted Random Selection
 
 ```text
-csvRowSchema = z.object({
-  korean:   z.string().trim().min(1).max(500).transform(stripHtml),
-  english:  z.string().trim().min(1).max(500).transform(stripHtml),
-  category: z.string().trim().max(100).transform(stripHtml).optional(),
-  note:     z.string().trim().max(1000).transform(stripHtml).optional(),
-})
-
-stripHtml(input):
-  - Remove all HTML tags via regex: /<[^>]*>/g
-  - Remove javascript: protocol references
-  - Remove on* event handler patterns (onerror, onclick, etc.)
-  - Collapse multiple whitespace
+function drawNextCard(pool):
+  totalWeight = sum of all weights in pool
+  r = Math.random() * totalWeight
+  cumulative = 0
+  for each card in pool:
+    cumulative += card.weight
+    if r <= cumulative: return card
 ```
 
-### No Database Changes Required
+## Weight Update (Post-Session)
 
-The existing `flashcards` and `categories` tables already have the needed columns and RLS policies in place.
+```text
+for each rated card:
+  weight = 5 - confidence
+  if confidence == 4: consecutiveFluent += 1
+  else: consecutiveFluent = 0
+  if consecutiveFluent >= 5: weight = 1 (maintenance mode)
+  save weight, confidenceScore, consecutiveFluent
+```
+
+## No New Files Needed
+
+All changes fit within existing files. No RLS changes required -- existing policies cover the new columns automatically.
 
