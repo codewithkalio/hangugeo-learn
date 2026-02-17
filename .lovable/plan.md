@@ -1,92 +1,50 @@
 
 
-# Implement Spaced Repetition (CBR Algorithm) -- Keeping Direction
+# Add Logging and Error Handling for Card Creation
 
-## Overview
+## Problem
+On iPhone 13 / Firefox, new cards silently fail to save roughly 1 in 3 times. The current code has two issues that could cause this:
 
-Replace the binary correct/incorrect drill with a confidence-based repetition algorithm. Users rate confidence 1-4 after each card. Cards get weights controlling how often they appear. Direction (Korean-to-English or English-to-Korean) remains as a secondary option below the session mode selector.
+1. **Fire-and-forget mutation** -- `addFlashcard` calls `mutate()` (not `mutateAsync`), so errors are swallowed silently. The success toast fires immediately regardless of whether the insert actually succeeded.
+2. **No error feedback** -- there is no `onError` handler on `addFlashcardMut`, and no logging anywhere in the flow.
+3. **Immediate navigation** -- `navigate('/cards')` runs right after `mutate()`, before the insert completes. On slower mobile connections this could cause the mutation to be cancelled.
 
-## Database Migration
+## Changes
 
-Add three columns to `flashcards`:
+### 1. `src/hooks/useAppData.ts` -- Add logging and error callbacks
 
-- `confidence_score` integer NOT NULL DEFAULT 0
-- `weight` integer NOT NULL DEFAULT 4
-- `consecutive_fluent` integer NOT NULL DEFAULT 0
+- Add `console.log` in `addFlashcardMut.mutationFn` before and after the Supabase insert, logging the card payload and response.
+- Add `console.error` when the insert fails.
+- Add an `onError` callback to `addFlashcardMut` that logs the full error object.
+- Change `addFlashcard` wrapper to return the mutation promise using `mutateAsync` instead of `mutate`, so the caller can await it.
 
-No changes to `drill_results` schema (the `cards` JSONB column format changes from `{ cardId, correct }` to `{ cardId, confidence }` but no migration needed).
+### 2. `src/pages/FlashcardForm.tsx` -- Await the mutation before navigating
 
-## Files to Modify
+- Make `handleSave` an `async` function.
+- `await addFlashcard(...)` inside a try/catch block.
+- Only show the success toast and navigate on success.
+- On catch, show an error toast ("Failed to save card -- please try again") and stay on the form so no data is lost.
+- Add a loading state (disable the Save button while saving) to prevent double-taps.
 
-### 1. `src/lib/types.ts`
+### 3. `src/hooks/useAppData.ts` -- Same treatment for `updateFlashcardMut`
 
-- Add `confidenceScore`, `weight`, `consecutiveFluent` to `Flashcard`
-- Change `DrillResult.cards` type to `{ cardId: string; confidence: number }[]`
-- Replace `correctCount` in `DrillResult` with computed values downstream
+- Add logging and switch to `mutateAsync` so edits also get proper error handling.
 
-### 2. `src/hooks/useAppData.ts`
+---
 
-- Map new columns in flashcard query (`confidence_score`, `weight`, `consecutive_fluent`)
-- Rewrite `addDrillResultMut`:
-  - Store `{ cardId, confidence }` format
-  - Post-session: update each card's `weight = 5 - confidence`, `confidence_score`, and `consecutive_fluent`
-  - If `consecutive_fluent >= 5`, set weight to near-zero (0.5 rounded to 1)
-
-### 3. `src/pages/FlashcardDrill.tsx` -- Full Rewrite
-
-**Setup phase:**
-- Primary selector: "Smart Session" vs "Category Focus" (two big buttons)
-- If Category Focus, show category dropdown
-- Secondary selector (below): Direction toggle -- Korean-to-English or English-to-Korean (same two-button row as today)
-- Card count summary and Start button
-
-**Drill phase:**
-- Weighted random card selection from remaining pool (no sequential index)
-- Tap-to-flip card display (same as today, respecting chosen direction)
-- After flip, show 4 confidence buttons instead of binary Missed/Got it:
-  - 1: "No idea" -- red tint
-  - 2: "Familiar" -- orange tint
-  - 3: "Got it" -- blue tint
-  - 4: "Fluent" -- green tint
-- Tooltip icon next to the rating buttons explaining the scale
-- Brief animated label after rating (e.g., "Will appear very frequently" for 1, "Will surface rarely" for 4)
-- Card removed from pool after rating; next card drawn by weight
-- Progress shows remaining cards count
-
-**Summary phase:**
-- Confidence distribution: how many cards rated 1, 2, 3, 4
-- "Review these" section for cards rated 1 or 2
-- Again / Done buttons
-
-### 4. `src/pages/Dashboard.tsx`
-
-- "Due for Review" counts cards with `weight >= 3`
-- Accuracy/progress stat shows average confidence or percentage of cards at confidence 3+
-
-## Weighted Random Selection
+### Technical Detail
 
 ```text
-function drawNextCard(pool):
-  totalWeight = sum of all weights in pool
-  r = Math.random() * totalWeight
-  cumulative = 0
-  for each card in pool:
-    cumulative += card.weight
-    if r <= cumulative: return card
+Before (fire-and-forget):
+  handleSave() -> addFlashcardMut.mutate(card)  // no await
+                -> toast.success(...)            // always fires
+                -> navigate('/cards')            // always fires
+
+After (awaited):
+  handleSave() -> await addFlashcardMut.mutateAsync(card)
+                   success -> toast.success(...) -> navigate('/cards')
+                   error   -> toast.error(...)   -> stay on form
 ```
 
-## Weight Update (Post-Session)
-
-```text
-for each rated card:
-  weight = 5 - confidence
-  if confidence == 4: consecutiveFluent += 1
-  else: consecutiveFluent = 0
-  if consecutiveFluent >= 5: weight = 1 (maintenance mode)
-  save weight, confidenceScore, consecutiveFluent
-```
-
-## No New Files Needed
-
-All changes fit within existing files. No RLS changes required -- existing policies cover the new columns automatically.
+The console logs will automatically appear in the browser tools, and Lovable will capture them so we can review them if the issue persists.
 
