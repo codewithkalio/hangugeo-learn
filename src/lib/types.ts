@@ -7,6 +7,9 @@ export interface Flashcard {
   createdAt: string;
   correctCount: number;
   incorrectCount: number;
+  confidenceScore: number;
+  weight: number;
+  consecutiveFluent: number;
 }
 
 export interface DrillResult {
@@ -15,7 +18,7 @@ export interface DrillResult {
   direction: 'en-to-kr' | 'kr-to-en';
   totalCards: number;
   correctCount: number;
-  cards: { cardId: string; correct: boolean }[];
+  cards: { cardId: string; confidence: number }[];
   category?: string;
 }
 

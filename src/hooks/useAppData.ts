@@ -29,6 +29,9 @@ export function useAppData() {
         createdAt: row.created_at,
         correctCount: row.correct_count,
         incorrectCount: row.incorrect_count,
+        confidenceScore: (row as any).confidence_score ?? 0,
+        weight: (row as any).weight ?? 4,
+        consecutiveFluent: (row as any).consecutive_fluent ?? 0,
       })) as Flashcard[];
     },
     enabled: !!userId,
@@ -49,7 +52,7 @@ export function useAppData() {
         direction: row.direction as DrillResult['direction'],
         totalCards: row.total_cards,
         correctCount: row.correct_count,
-        cards: row.cards as { cardId: string; correct: boolean }[],
+        cards: row.cards as { cardId: string; confidence: number }[],
         category: row.category ?? undefined,
       })) as DrillResult[];
     },
@@ -67,7 +70,6 @@ export function useAppData() {
       if (error) throw error;
 
       if (data.length === 0 && userId) {
-        // Seed defaults
         const rows = DEFAULT_CATEGORIES.map(name => ({ user_id: userId, name }));
         const { data: seeded, error: seedErr } = await supabase
           .from('categories')
@@ -84,7 +86,7 @@ export function useAppData() {
 
   // ── Mutations ──
   const addFlashcardMut = useMutation({
-    mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount'>) => {
+    mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
       const { data, error } = await supabase
         .from('flashcards')
         .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
@@ -120,30 +122,46 @@ export function useAppData() {
   const addCategoryMut = useMutation({
     mutationFn: async (name: string) => {
       const { error } = await supabase.from('categories').insert({ user_id: userId!, name } as any);
-      if (error && error.code !== '23505') throw error; // ignore duplicate
+      if (error && error.code !== '23505') throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories', userId] }),
   });
 
   const addDrillResultMut = useMutation({
     mutationFn: async (result: Omit<DrillResult, 'id' | 'date'>) => {
+      // Compute correctCount from confidence (3 or 4 = correct)
+      const correctCount = result.cards.filter(c => c.confidence >= 3).length;
+
       // Insert drill result
       const { error: drillErr } = await supabase.from('drill_results').insert({
         user_id: userId!,
         direction: result.direction,
         total_cards: result.totalCards,
-        correct_count: result.correctCount,
+        correct_count: correctCount,
         cards: result.cards as unknown as Record<string, unknown>[],
         category: result.category ?? null,
       } as any);
       if (drillErr) throw drillErr;
 
-      // Update card stats
+      // Update card weights and confidence scores
       for (const c of result.cards) {
-        const update = c.correct
-          ? { correct_count: (flashcards.find(f => f.id === c.cardId)?.correctCount ?? 0) + 1 }
-          : { incorrect_count: (flashcards.find(f => f.id === c.cardId)?.incorrectCount ?? 0) + 1 };
-        await supabase.from('flashcards').update(update).eq('id', c.cardId);
+        const card = flashcards.find(f => f.id === c.cardId);
+        if (!card) continue;
+
+        let newConsecutiveFluent = c.confidence === 4
+          ? (card.consecutiveFluent + 1)
+          : 0;
+
+        let newWeight = 5 - c.confidence;
+        if (newConsecutiveFluent >= 5) {
+          newWeight = 1; // maintenance mode
+        }
+
+        await supabase.from('flashcards').update({
+          confidence_score: c.confidence,
+          weight: newWeight,
+          consecutive_fluent: newConsecutiveFluent,
+        } as any).eq('id', c.cardId);
       }
     },
     onSuccess: () => {
@@ -152,9 +170,9 @@ export function useAppData() {
     },
   });
 
-  // ── Stable callbacks matching old interface ──
+  // ── Stable callbacks ──
   const addFlashcard = useCallback(
-    (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount'>) => {
+    (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
       addFlashcardMut.mutate(card);
     },
     [addFlashcardMut]

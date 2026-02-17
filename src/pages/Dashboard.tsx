@@ -7,13 +7,12 @@ export default function Dashboard() {
   const { data } = useApp();
 
   const totalCards = data.flashcards.length;
-  const totalAttempts = data.flashcards.reduce((s, c) => s + c.correctCount + c.incorrectCount, 0);
-  const totalCorrect = data.flashcards.reduce((s, c) => s + c.correctCount, 0);
-  const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
-  const dueCards = data.flashcards.filter(c => {
-    const total = c.correctCount + c.incorrectCount;
-    return total === 0 || c.correctCount / total < 0.8;
-  }).length;
+  const cardsWithConfidence = data.flashcards.filter(c => c.confidenceScore > 0);
+  const avgConfidence = cardsWithConfidence.length > 0
+    ? (cardsWithConfidence.reduce((s, c) => s + c.confidenceScore, 0) / cardsWithConfidence.length)
+    : 0;
+  const confidencePct = Math.round((avgConfidence / 4) * 100);
+  const dueCards = data.flashcards.filter(c => c.weight >= 3).length;
 
   const fadeUp = {
     hidden: { opacity: 0, y: 16 },
@@ -55,8 +54,8 @@ export default function Dashboard() {
         </div>
         <div className="soft-card p-4 text-center">
           <TrendingUp className="h-5 w-5 mx-auto text-success mb-1" />
-          <p className="text-xl font-display font-bold text-foreground">{accuracy}%</p>
-          <p className="text-[10px] text-muted-foreground font-medium">Accuracy</p>
+          <p className="text-xl font-display font-bold text-foreground">{confidencePct}%</p>
+          <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
         </div>
         <div className="soft-card p-4 text-center">
           <BookOpen className="h-5 w-5 mx-auto text-accent mb-1" />
@@ -64,8 +63,6 @@ export default function Dashboard() {
           <p className="text-[10px] text-muted-foreground font-medium">Due for Review</p>
         </div>
       </motion.div>
-
-
     </div>
   );
 }
