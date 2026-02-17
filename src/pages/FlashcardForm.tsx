@@ -162,8 +162,10 @@ export default function FlashcardForm() {
 
       {/* Similar cards in your bank */}
       {similarCards.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-sm font-display font-bold text-muted-foreground">
+        <>
+          <hr className="border-border my-4" />
+          <div className="space-y-2">
+            <h2 className="text-sm font-display font-bold text-muted-foreground">
             Similar cards in your bank
           </h2>
           <div className="space-y-2">
@@ -195,7 +197,8 @@ export default function FlashcardForm() {
               </div>
             ))}
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
