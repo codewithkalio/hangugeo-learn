@@ -87,28 +87,40 @@ export function useAppData() {
   // ── Mutations ──
   const addFlashcardMut = useMutation({
     mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
+      console.log('[addFlashcard] Inserting card:', { korean: card.korean, english: card.english, category: card.category, note: card.note });
       const { data, error } = await supabase
         .from('flashcards')
         .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error('[addFlashcard] Supabase error:', error);
+        throw error;
+      }
+      console.log('[addFlashcard] Success:', data);
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
+    onError: (error) => console.error('[addFlashcard] Mutation error:', error),
   });
 
   const updateFlashcardMut = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Flashcard> }) => {
+      console.log('[updateFlashcard] Updating card:', { id, updates });
       const mapped: Record<string, unknown> = {};
       if (updates.korean !== undefined) mapped.korean = updates.korean;
       if (updates.english !== undefined) mapped.english = updates.english;
       if (updates.category !== undefined) mapped.category = updates.category ?? null;
       if (updates.note !== undefined) mapped.note = updates.note ?? null;
       const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
-      if (error) throw error;
+      if (error) {
+        console.error('[updateFlashcard] Supabase error:', error);
+        throw error;
+      }
+      console.log('[updateFlashcard] Success');
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
+    onError: (error) => console.error('[updateFlashcard] Mutation error:', error),
   });
 
   const deleteFlashcardMut = useMutation({
@@ -173,14 +185,14 @@ export function useAppData() {
   // ── Stable callbacks ──
   const addFlashcard = useCallback(
     (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
-      addFlashcardMut.mutate(card);
+      return addFlashcardMut.mutateAsync(card);
     },
     [addFlashcardMut]
   );
 
   const updateFlashcard = useCallback(
     (id: string, updates: Partial<Flashcard>) => {
-      updateFlashcardMut.mutate({ id, updates });
+      return updateFlashcardMut.mutateAsync({ id, updates });
     },
     [updateFlashcardMut]
   );

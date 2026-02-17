@@ -24,6 +24,7 @@ export default function FlashcardForm() {
   const [category, setCategory] = useState(existing?.category || '');
   const [note, setNote] = useState(existing?.note || '');
   const [newCategory, setNewCategory] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const similarCards = useMemo((): Flashcard[] => {
     const q = korean.trim();
@@ -44,11 +45,13 @@ export default function FlashcardForm() {
       .slice(0, 10);
   }, [korean, data.flashcards, isEdit, id]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!korean.trim() || !english.trim()) {
       toast.error('Both fields are required');
       return;
     }
+    if (isSaving) return;
+    setIsSaving(true);
 
     const finalCategory = category === '__new__' ? newCategory.trim() : category;
     if (category === '__new__' && newCategory.trim()) {
@@ -57,15 +60,21 @@ export default function FlashcardForm() {
 
     const finalNote = note.trim() || undefined;
 
-    if (isEdit && id) {
-      updateFlashcard(id, { korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
-      toast.success('Card updated! ✏️');
-    } else {
-      addFlashcard({ korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
-      toast.success('Card created! 🎉');
+    try {
+      if (isEdit && id) {
+        await updateFlashcard(id, { korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
+        toast.success('Card updated! ✏️');
+      } else {
+        await addFlashcard({ korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
+        toast.success('Card created! 🎉');
+      }
+      navigate('/cards');
+    } catch (error) {
+      console.error('[FlashcardForm] Save failed:', error);
+      toast.error('Failed to save card — please try again');
+    } finally {
+      setIsSaving(false);
     }
-
-    navigate('/cards');
   };
 
   return (
@@ -153,10 +162,11 @@ export default function FlashcardForm() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={handleSave}
-          className="w-full soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold text-base flex items-center justify-center gap-2"
+          disabled={isSaving}
+          className="w-full soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold text-base flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <Save className="h-5 w-5" />
-          {isEdit ? 'Update Card' : 'Save Card'}
+          {isSaving ? 'Saving...' : isEdit ? 'Update Card' : 'Save Card'}
         </motion.button>
       </motion.div>
 
