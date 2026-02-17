@@ -68,6 +68,8 @@ export type Database = {
       flashcards: {
         Row: {
           category: string | null
+          confidence_score: number
+          consecutive_fluent: number
           correct_count: number
           created_at: string
           english: string
@@ -76,9 +78,12 @@ export type Database = {
           korean: string
           note: string | null
           user_id: string
+          weight: number
         }
         Insert: {
           category?: string | null
+          confidence_score?: number
+          consecutive_fluent?: number
           correct_count?: number
           created_at?: string
           english: string
@@ -87,9 +92,12 @@ export type Database = {
           korean: string
           note?: string | null
           user_id: string
+          weight?: number
         }
         Update: {
           category?: string | null
+          confidence_score?: number
+          consecutive_fluent?: number
           correct_count?: number
           created_at?: string
           english?: string
@@ -98,6 +106,7 @@ export type Database = {
           korean?: string
           note?: string | null
           user_id?: string
+          weight?: number
         }
         Relationships: []
       }

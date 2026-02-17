@@ -7,31 +7,37 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 export default function Stats() {
   const { data } = useApp();
 
-  const totalAttempts = data.flashcards.reduce((s, c) => s + c.correctCount + c.incorrectCount, 0);
-  const totalCorrect = data.flashcards.reduce((s, c) => s + c.correctCount, 0);
-  const overallAcc = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+  const cardsWithConfidence = data.flashcards.filter(c => c.confidenceScore > 0);
+  const avgConfidence = cardsWithConfidence.length > 0
+    ? (cardsWithConfidence.reduce((s, c) => s + c.confidenceScore, 0) / cardsWithConfidence.length)
+    : 0;
+  const confidencePct = Math.round((avgConfidence / 4) * 100);
 
-  // Category breakdown
+  // Category breakdown by avg confidence
   const catStats = data.categories.map(cat => {
     const cards = data.flashcards.filter(c => c.category === cat);
-    const attempts = cards.reduce((s, c) => s + c.correctCount + c.incorrectCount, 0);
-    const correct = cards.reduce((s, c) => s + c.correctCount, 0);
-    return { name: cat, accuracy: attempts > 0 ? Math.round((correct / attempts) * 100) : 0, count: cards.length };
+    const rated = cards.filter(c => c.confidenceScore > 0);
+    const avg = rated.length > 0 ? rated.reduce((s, c) => s + c.confidenceScore, 0) / rated.length : 0;
+    return { name: cat, confidence: Math.round((avg / 4) * 100), count: cards.length };
   }).filter(c => c.count > 0);
 
-  // Weakest words
+  // Weakest words (lowest confidence, highest weight)
   const weakest = data.flashcards
-    .filter(c => c.correctCount + c.incorrectCount > 0)
-    .map(c => ({
-      ...c,
-      accuracy: Math.round((c.correctCount / (c.correctCount + c.incorrectCount)) * 100),
-    }))
-    .sort((a, b) => a.accuracy - b.accuracy)
+    .filter(c => c.confidenceScore > 0)
+    .sort((a, b) => a.confidenceScore - b.confidenceScore || b.weight - a.weight)
     .slice(0, 5);
 
   const fadeUp = {
     hidden: { opacity: 0, y: 16 },
     visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.4 } }),
+  };
+
+  const confLabel = (score: number) => {
+    if (score === 4) return 'Fluent';
+    if (score === 3) return 'Got it';
+    if (score === 2) return 'Familiar';
+    if (score === 1) return 'No idea';
+    return '—';
   };
 
   return (
@@ -50,8 +56,8 @@ export default function Stats() {
           <p className="text-xs text-muted-foreground">Cards</p>
         </div>
         <div className="soft-card p-4 text-center">
-          <p className="text-2xl font-display font-bold">{overallAcc}%</p>
-          <p className="text-xs text-muted-foreground">Accuracy</p>
+          <p className="text-2xl font-display font-bold">{confidencePct}%</p>
+          <p className="text-xs text-muted-foreground">Confidence</p>
         </div>
         <div className="soft-card p-4 text-center">
           <p className="text-2xl font-display font-bold">{data.drillResults.length}</p>
@@ -59,9 +65,9 @@ export default function Stats() {
         </div>
       </motion.div>
 
-      {/* Accuracy Ring */}
+      {/* Confidence Ring */}
       <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp} className="soft-card p-6">
-        <h2 className="font-display font-bold text-sm mb-4">Overall Accuracy</h2>
+        <h2 className="font-display font-bold text-sm mb-4">Overall Confidence</h2>
         <div className="flex items-center justify-center">
           <div className="relative w-32 h-32">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -69,12 +75,12 @@ export default function Stats() {
               <path
                 d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none" stroke="hsl(var(--primary))" strokeWidth="3"
-                strokeDasharray={`${overallAcc}, 100`}
+                strokeDasharray={`${confidencePct}, 100`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-display font-bold">{overallAcc}%</span>
+              <span className="text-2xl font-display font-bold">{confidencePct}%</span>
             </div>
           </div>
         </div>
@@ -89,7 +95,7 @@ export default function Stats() {
               <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip formatter={(v: number) => `${v}%`} />
-              <Bar dataKey="accuracy" radius={[8, 8, 0, 0]}>
+              <Bar dataKey="confidence" radius={[8, 8, 0, 0]}>
                 {catStats.map((_, i) => (
                   <Cell key={i} fill={`hsl(var(--primary) / ${0.5 + i * 0.1})`} />
                 ))}
@@ -110,8 +116,8 @@ export default function Stats() {
                   <p className="font-medium text-sm">{card.korean}</p>
                   <p className="text-xs text-muted-foreground">{card.english}</p>
                 </div>
-                <span className={`text-sm font-bold ${card.accuracy >= 50 ? 'text-accent' : 'text-destructive'}`}>
-                  {card.accuracy}%
+                <span className={`text-xs font-bold ${card.confidenceScore >= 3 ? 'text-primary' : 'text-destructive'}`}>
+                  {confLabel(card.confidenceScore)}
                 </span>
               </div>
             ))}
@@ -124,20 +130,25 @@ export default function Stats() {
         <motion.div initial="hidden" animate="visible" custom={4} variants={fadeUp} className="soft-card p-5">
           <h2 className="font-display font-bold text-sm mb-3">📝 Recent Drills</h2>
           <div className="space-y-2">
-            {data.drillResults.slice(0, 10).map(r => (
-              <div key={r.id} className="flex items-center justify-between py-1 border-b border-border/50 last:border-0">
-                <div>
-                  <p className="text-sm font-medium">{r.direction === 'en-to-kr' ? '🇺🇸 → 🇰🇷' : '🇰🇷 → 🇺🇸'}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</p>
+            {data.drillResults.slice(0, 10).map(r => {
+              const avg = r.cards.length > 0
+                ? (r.cards.reduce((s: number, c: any) => s + (c.confidence ?? (c.correct ? 4 : 1)), 0) / r.cards.length).toFixed(1)
+                : '0';
+              return (
+                <div key={r.id} className="flex items-center justify-between py-1 border-b border-border/50 last:border-0">
+                  <div>
+                    <p className="text-sm font-medium">{r.direction === 'en-to-kr' ? '🇺🇸 → 🇰🇷' : '🇰🇷 → 🇺🇸'}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(r.date).toLocaleDateString()}</p>
+                  </div>
+                  <span className="text-sm font-bold font-display">{avg} / 4</span>
                 </div>
-                <span className="text-sm font-bold font-display">{Math.round((r.correctCount / r.totalCards) * 100)}%</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </motion.div>
       )}
 
-      {totalAttempts === 0 && (
+      {cardsWithConfidence.length === 0 && data.drillResults.length === 0 && (
         <div className="soft-card p-8 text-center">
           <p className="text-4xl mb-3">📈</p>
           <p className="text-muted-foreground">Complete some drills to see your stats!</p>
