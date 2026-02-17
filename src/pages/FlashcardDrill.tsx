@@ -50,10 +50,14 @@ export default function FlashcardDrill() {
   const usedCategories = [...new Set(data.flashcards.map(c => c.category).filter(Boolean))] as string[];
 
   const deckSize = useMemo(() => {
+    let count = data.flashcards.length;
     if (sessionMode === 'category' && filterCat !== 'all') {
-      return data.flashcards.filter(c => c.category === filterCat).length;
+      count = data.flashcards.filter(c => c.category === filterCat).length;
     }
-    return data.flashcards.length;
+    if (sessionMode === 'smart') {
+      return Math.min(count, SMART_SESSION_LIMIT);
+    }
+    return count;
   }, [data.flashcards, sessionMode, filterCat]);
 
   const startDrill = useCallback(() => {
