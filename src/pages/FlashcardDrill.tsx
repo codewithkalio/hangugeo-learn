@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, HelpCircle, Brain, FolderOpen } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,11 +15,13 @@ type DrillPhase = 'setup' | 'drill' | 'summary';
 type Direction = 'kr-to-en' | 'en-to-kr';
 type SessionMode = 'smart' | 'category';
 
+const SMART_SESSION_LIMIT = 15;
+
 const CONFIDENCE_OPTIONS = [
-  { value: 1, label: 'No idea', emoji: '😵', colorClass: 'bg-destructive/15 text-destructive', feedback: 'Will appear very frequently' },
-  { value: 2, label: 'Familiar', emoji: '🤔', colorClass: 'bg-accent/15 text-accent', feedback: 'Will appear often' },
-  { value: 3, label: 'Got it', emoji: '😊', colorClass: 'bg-primary/15 text-primary', feedback: 'Will appear occasionally' },
-  { value: 4, label: 'Fluent', emoji: '🔥', colorClass: 'bg-success/15 text-success', feedback: 'Will surface rarely' },
+  { value: 1, label: 'No idea', colorClass: 'bg-destructive/15 text-destructive' },
+  { value: 2, label: 'Familiar', colorClass: 'bg-accent/15 text-accent' },
+  { value: 3, label: 'Got it', colorClass: 'bg-primary/15 text-primary' },
+  { value: 4, label: 'Fluent', colorClass: 'bg-success/15 text-success' },
 ] as const;
 
 function drawNextCard(pool: Flashcard[]): Flashcard {
@@ -44,7 +46,6 @@ export default function FlashcardDrill() {
   const [results, setResults] = useState<{ cardId: string; confidence: number }[]>([]);
   const [pool, setPool] = useState<Flashcard[]>([]);
   const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
-  const [feedbackText, setFeedbackText] = useState<string | null>(null);
   const [totalInSession, setTotalInSession] = useState(0);
 
   const usedCategories = [...new Set(data.flashcards.map(c => c.category).filter(Boolean))] as string[];
@@ -63,8 +64,19 @@ export default function FlashcardDrill() {
     }
     if (cards.length === 0) return;
 
+    // Limit smart sessions to SMART_SESSION_LIMIT cards (pick by weight)
+    if (sessionMode === 'smart' && cards.length > SMART_SESSION_LIMIT) {
+      const selected: Flashcard[] = [];
+      let remaining = [...cards];
+      while (selected.length < SMART_SESSION_LIMIT && remaining.length > 0) {
+        const pick = drawNextCard(remaining);
+        selected.push(pick);
+        remaining = remaining.filter(c => c.id !== pick.id);
+      }
+      cards = selected;
+    }
+
     setResults([]);
-    setFeedbackText(null);
     setTotalInSession(cards.length);
     const first = drawNextCard(cards);
     const remaining = cards.filter(c => c.id !== first.id);
@@ -77,33 +89,24 @@ export default function FlashcardDrill() {
   const rateCard = useCallback((confidence: number) => {
     if (!currentCard) return;
 
-    const option = CONFIDENCE_OPTIONS.find(o => o.value === confidence)!;
-    setFeedbackText(option.feedback);
-
     const newResults = [...results, { cardId: currentCard.id, confidence }];
     setResults(newResults);
 
-    // Brief delay to show feedback, then advance
-    setTimeout(() => {
-      setFeedbackText(null);
-
-      if (pool.length === 0) {
-        // Session complete
-        addDrillResult({
-          direction,
-          totalCards: totalInSession,
-          correctCount: newResults.filter(r => r.confidence >= 3).length,
-          cards: newResults,
-          category: sessionMode === 'category' && filterCat !== 'all' ? filterCat : undefined,
-        });
-        setPhase('summary');
-      } else {
-        const next = drawNextCard(pool);
-        setPool(prev => prev.filter(c => c.id !== next.id));
-        setCurrentCard(next);
-        setFlipped(false);
-      }
-    }, 800);
+    if (pool.length === 0) {
+      addDrillResult({
+        direction,
+        totalCards: totalInSession,
+        correctCount: newResults.filter(r => r.confidence >= 3).length,
+        cards: newResults,
+        category: sessionMode === 'category' && filterCat !== 'all' ? filterCat : undefined,
+      });
+      setPhase('summary');
+    } else {
+      const next = drawNextCard(pool);
+      setPool(prev => prev.filter(c => c.id !== next.id));
+      setCurrentCard(next);
+      setFlipped(false);
+    }
   }, [currentCard, results, pool, direction, totalInSession, filterCat, sessionMode, addDrillResult]);
 
   // ── Setup Phase ──
@@ -286,8 +289,8 @@ export default function FlashcardDrill() {
       {/* Flip Card */}
       <motion.div
         className="cursor-pointer perspective-1000"
-        onClick={() => !feedbackText && setFlipped(!flipped)}
-        whileTap={feedbackText ? {} : { scale: 0.98 }}
+        onClick={() => setFlipped(!flipped)}
+        whileTap={{ scale: 0.98 }}
       >
         <div className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center">
           <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
@@ -306,7 +309,7 @@ export default function FlashcardDrill() {
       </motion.div>
 
       {/* Confidence Buttons */}
-      {flipped && !feedbackText && (
+      {flipped && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <div className="flex items-center justify-center gap-1">
             <p className="text-xs text-muted-foreground font-medium">Rate your confidence</p>
@@ -332,27 +335,12 @@ export default function FlashcardDrill() {
                 onClick={() => rateCard(opt.value)}
                 className={`soft-btn ${opt.colorClass} py-3 rounded-xl font-display font-bold text-xs flex flex-col items-center gap-1`}
               >
-                <span className="text-lg">{opt.emoji}</span>
                 {opt.label}
               </motion.button>
             ))}
           </div>
         </motion.div>
       )}
-
-      {/* Feedback Toast */}
-      <AnimatePresence>
-        {feedbackText && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="soft-card p-3 text-center"
-          >
-            <p className="text-sm text-muted-foreground font-medium">{feedbackText}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
