@@ -32,7 +32,9 @@ export default function FlashcardForm() {
       .filter((card) => {
         if (isEdit && id && card.id === id) return false;
         const k = card.korean.trim();
-        return k === q || card.korean.includes(q) || q.includes(k);
+        if (k === q) return true;
+        const words = card.korean.split(/\s+/).map((w) => w.trim()).filter(Boolean);
+        return words.some((word) => word === q);
       })
       .sort((a, b) => {
         const aExact = a.korean.trim() === q ? 1 : 0;
@@ -80,12 +82,19 @@ export default function FlashcardForm() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         {/* Korean Field */}
         <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
+            {similarCards.length > 0 && (
+              <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground border-none">
+                Similar cards found
+              </Badge>
+            )}
+          </div>
           <Input
             value={korean}
             onChange={e => setKorean(e.target.value)}
             placeholder="한국어 단어..."
-            className="soft-inset border-none bg-background text-lg"
+            className={`soft-inset border-none bg-background text-lg ${similarCards.length > 0 ? 'ring-2 ring-muted-foreground/50' : ''}`}
           />
         </div>
 
