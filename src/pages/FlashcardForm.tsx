@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Edit2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import type { Flashcard } from '@/lib/types';
 
 export default function FlashcardForm() {
   const { data, addFlashcard, updateFlashcard, addCategory } = useApp();
@@ -22,6 +24,23 @@ export default function FlashcardForm() {
   const [category, setCategory] = useState(existing?.category || '');
   const [note, setNote] = useState(existing?.note || '');
   const [newCategory, setNewCategory] = useState('');
+
+  const similarCards = useMemo((): Flashcard[] => {
+    const q = korean.trim();
+    if (q.length < 1) return [];
+    return data.flashcards
+      .filter((card) => {
+        if (isEdit && id && card.id === id) return false;
+        const k = card.korean.trim();
+        return k === q || card.korean.includes(q) || q.includes(k);
+      })
+      .sort((a, b) => {
+        const aExact = a.korean.trim() === q ? 1 : 0;
+        const bExact = b.korean.trim() === q ? 1 : 0;
+        return bExact - aExact;
+      })
+      .slice(0, 10);
+  }, [korean, data.flashcards, isEdit, id]);
 
   const handleSave = () => {
     if (!korean.trim() || !english.trim()) {
@@ -131,6 +150,44 @@ export default function FlashcardForm() {
           {isEdit ? 'Update Card' : 'Save Card'}
         </motion.button>
       </motion.div>
+
+      {/* Similar cards in your bank */}
+      {similarCards.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-sm font-display font-bold text-muted-foreground">
+            Similar cards in your bank
+          </h2>
+          <div className="space-y-2">
+            {similarCards.map((card) => (
+              <div
+                key={card.id}
+                className="soft-card p-4 flex items-center gap-3"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-foreground truncate">{card.korean}</p>
+                  <p className="text-sm text-muted-foreground truncate">{card.english}</p>
+                  {card.category && (
+                    <Badge
+                      variant="secondary"
+                      className="mt-1 text-[10px] bg-muted text-muted-foreground border-none"
+                    >
+                      {card.category}
+                    </Badge>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/cards/edit/${card.id}`)}
+                  className="p-2 rounded-xl hover:bg-muted transition-colors"
+                  aria-label={`Edit ${card.korean}`}
+                >
+                  <Edit2 className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
