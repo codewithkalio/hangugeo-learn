@@ -94,14 +94,14 @@ export function useAppData() {
         .select()
         .single();
       if (error) {
-        console.error('[addFlashcard] Supabase error:', error);
+        console.error('[addFlashcard] Supabase error:', JSON.stringify(error));
         throw error;
       }
       console.log('[addFlashcard] Success:', data);
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
-    onError: (error) => console.error('[addFlashcard] Mutation error:', error),
+    onError: (error) => console.error('[addFlashcard] Mutation error:', JSON.stringify(error)),
   });
 
   const updateFlashcardMut = useMutation({
@@ -114,13 +114,13 @@ export function useAppData() {
       if (updates.note !== undefined) mapped.note = updates.note ?? null;
       const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
       if (error) {
-        console.error('[updateFlashcard] Supabase error:', error);
+        console.error('[updateFlashcard] Supabase error:', JSON.stringify(error));
         throw error;
       }
       console.log('[updateFlashcard] Success');
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
-    onError: (error) => console.error('[updateFlashcard] Mutation error:', error),
+    onError: (error) => console.error('[updateFlashcard] Mutation error:', JSON.stringify(error)),
   });
 
   const deleteFlashcardMut = useMutation({
