@@ -21,7 +21,10 @@ export default function FlashcardBank() {
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    searchRef.current?.focus();
+    const timer = setTimeout(() => {
+      searchRef.current?.focus();
+    }, 300);
+    return () => clearTimeout(timer);
   }, []);
 
   const filtered = data.flashcards.filter(c => {
@@ -48,6 +51,7 @@ export default function FlashcardBank() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             ref={searchRef}
+            autoFocus
             placeholder="Search cards..."
             value={search}
             onChange={e => setSearch(e.target.value)}
