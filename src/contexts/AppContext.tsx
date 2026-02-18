@@ -3,7 +3,16 @@ import { useAppData } from '@/hooks/useAppData';
 
 type AppContextType = ReturnType<typeof useAppData>;
 
-const AppContext = createContext<AppContextType | null>(null);
+const fallback: AppContextType = {
+  data: { flashcards: [], drillResults: [], categories: [], streak: 0, lastDrillDate: null },
+  addFlashcard: async () => ({}) as any,
+  updateFlashcard: async () => {},
+  deleteFlashcard: () => {},
+  addCategory: () => {},
+  addDrillResult: () => {},
+};
+
+const AppContext = createContext<AppContextType>(fallback);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const appData = useAppData();
@@ -11,7 +20,5 @@ export function AppProvider({ children }: { children: ReactNode }) {
 }
 
 export function useApp() {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error('useApp must be used within AppProvider');
-  return ctx;
+  return useContext(AppContext);
 }
