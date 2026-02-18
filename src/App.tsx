@@ -16,7 +16,11 @@ import Stats from "./pages/Stats";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: { retry: 1 },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
