@@ -81,16 +81,29 @@ export default function FlashcardBank() {
       </div>
 
       {/* Card List */}
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && data.flashcards.length === 0 ? (
         <div className="soft-card p-8 text-center">
           <p className="text-4xl mb-3">📭</p>
           <p className="text-muted-foreground font-medium">No flashcards yet</p>
           <Link
-            to={`/cards/new${search ? `?q=${encodeURIComponent(search)}` : ''}`}
+            to="/cards/new"
             className="inline-block mt-3 soft-btn bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium"
           >
             Create your first card
           </Link>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="soft-card p-8 text-center">
+          <p className="text-4xl mb-3">🔍</p>
+          <p className="text-muted-foreground font-medium">No matches found</p>
+          {search && (
+            <Link
+              to={`/cards/new?q=${encodeURIComponent(search)}`}
+              className="inline-block mt-3 soft-btn bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium"
+            >
+              Add "{search}" as a new card
+            </Link>
+          )}
         </div>
       ) : (
         <AnimatePresence>
