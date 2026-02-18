@@ -1,50 +1,56 @@
 
 
-# Fix "TypeError: Load failed" on Consecutive Card Adds (Mobile)
+# Fix: Search Input Focus Issue on iOS After Card Creation
 
 ## Problem
-On mobile browsers (iOS Chrome/Safari), adding two flashcards in a row fails on the second attempt with `TypeError: Load failed`. This is a well-known mobile browser issue where `fetch` requests are cancelled or disrupted -- often caused by page navigation triggering background refetches that interfere with subsequent requests.
+After creating a card and navigating back to the Flashcards page, iOS requires multiple taps to focus the search input and bring up the keyboard. This happens because:
 
-## Root Cause
-After a successful save, `navigate('/cards')` fires, and `onSuccess` invalidates the flashcards query (triggering a refetch). When the user navigates back to `/cards/new` quickly, the previous refetch may still be in-flight or the browser's network layer is in a disrupted state, causing the next `fetch` to fail with "Load failed".
+1. The `useEffect` fires `searchRef.current?.focus()` immediately on mount
+2. But at that point, React Query is invalidating/refetching flashcards data, causing re-renders
+3. The AnimatePresence animations are also running (each card animates in with a staggered delay)
+4. These re-renders and layout shifts steal or reset focus on iOS, which is stricter than desktop browsers about maintaining focus during DOM mutations
 
-## Solution: Add retry logic to the mutation
+## Solution
+Replace the immediate `useEffect` focus with a delayed focus that waits for the initial data refetch and animations to settle. Additionally, on iOS specifically, programmatic `.focus()` outside a user gesture context won't open the keyboard -- so we should set the input's `autoFocus` attribute as a secondary mechanism and use a `requestAnimationFrame` + `setTimeout` combination to catch the right moment.
 
-### `src/hooks/useAppData.ts`
+### Changes
 
-Add a simple retry wrapper and apply it to `addFlashcardMut.mutationFn`:
+**`src/pages/FlashcardBank.tsx`**
 
-```typescript
-async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await fn();
-    } catch (err: any) {
-      if (i === retries || !err?.message?.includes('Load failed')) throw err;
-      await new Promise(r => setTimeout(r, delay));
-    }
-  }
-  throw new Error('Unreachable');
-}
-```
-
-Wrap the Supabase insert call inside `retryFetch(...)` so that transient "Load failed" errors are automatically retried (up to 2 retries with 500ms delay).
-
-Apply the same pattern to `updateFlashcardMut` for consistency.
-
-### `src/main.tsx` (or QueryClient config)
-
-Also configure `react-query`'s global retry to handle transient network errors:
+Replace the current focus effect:
 
 ```typescript
-const queryClient = new QueryClient({
-  defaultOptions: {
-    mutations: { retry: 1 },
-  },
-});
+useEffect(() => {
+  searchRef.current?.focus();
+}, []);
 ```
 
-This provides a two-layer safety net: the custom retry for "Load failed" specifically, and react-query's built-in retry as a fallback.
+With a delayed version that waits for re-renders to settle:
 
-## No other files affected.
+```typescript
+useEffect(() => {
+  // Delay focus to let query refetches and entry animations settle.
+  // On iOS, immediate focus during re-renders gets lost.
+  const timer = setTimeout(() => {
+    searchRef.current?.focus();
+  }, 300);
+  return () => clearTimeout(timer);
+}, []);
+```
+
+Also add `autoFocus` to the Input element as a belt-and-suspenders approach -- this helps on first navigation (before any re-renders interfere):
+
+```tsx
+<Input
+  ref={searchRef}
+  autoFocus
+  placeholder="Search cards..."
+  ...
+/>
+```
+
+### Why This Works
+- The 300ms delay lets React Query's refetch complete and AnimatePresence finish its initial render pass
+- `autoFocus` gives the browser a native hint to focus on mount (works better than programmatic focus on some mobile browsers)
+- The cleanup function prevents the focus from firing if the user navigates away quickly
 
