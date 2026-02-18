@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Plus, Trash2, Edit2, Filter, X } from 'lucide-react';
@@ -18,6 +18,11 @@ export default function FlashcardBank() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState<string>('all');
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    searchRef.current?.focus();
+  }, []);
 
   const filtered = data.flashcards.filter(c => {
     const matchSearch =
@@ -42,6 +47,7 @@ export default function FlashcardBank() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
+            ref={searchRef}
             placeholder="Search cards..."
             value={search}
             onChange={e => setSearch(e.target.value)}
