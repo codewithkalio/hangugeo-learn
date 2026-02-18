@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Plus, Trash2, Edit2, Filter } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -20,7 +20,10 @@ export default function FlashcardBank() {
   const [filterCat, setFilterCat] = useState<string>('all');
 
   const filtered = data.flashcards.filter(c => {
-    const matchSearch = c.korean.includes(search) || c.english.toLowerCase().includes(search.toLowerCase());
+    const matchSearch =
+      c.korean.includes(search) ||
+      c.english.toLowerCase().includes(search.toLowerCase()) ||
+      (c.note && c.note.toLowerCase().includes(search.toLowerCase()));
     const matchCat = filterCat === 'all' || c.category === filterCat;
     return matchSearch && matchCat;
   });
@@ -34,7 +37,7 @@ export default function FlashcardBank() {
         <span className="text-sm text-muted-foreground">{data.flashcards.length} cards</span>
       </div>
 
-      {/* Search & Filter */}
+      {/* Search, Add & Filter */}
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -42,9 +45,25 @@ export default function FlashcardBank() {
             placeholder="Search cards..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="pl-9 soft-inset border-none bg-background"
+            className="pl-9 pr-8 soft-inset border-none bg-background"
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          )}
         </div>
+        <button
+          onClick={() => navigate(`/cards/new${search ? `?q=${encodeURIComponent(search)}` : ''}`)}
+          className="soft-btn bg-primary text-primary-foreground h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+          aria-label="Add card"
+        >
+          <Plus className="h-5 w-5" />
+        </button>
         {usedCategories.length > 0 && (
           <Select value={filterCat} onValueChange={setFilterCat}>
             <SelectTrigger className="w-32 soft-inset border-none bg-background">
@@ -66,7 +85,10 @@ export default function FlashcardBank() {
         <div className="soft-card p-8 text-center">
           <p className="text-4xl mb-3">📭</p>
           <p className="text-muted-foreground font-medium">No flashcards yet</p>
-          <Link to="/cards/new" className="inline-block mt-3 soft-btn bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium">
+          <Link
+            to={`/cards/new${search ? `?q=${encodeURIComponent(search)}` : ''}`}
+            className="inline-block mt-3 soft-btn bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium"
+          >
             Create your first card
           </Link>
         </div>
@@ -88,6 +110,9 @@ export default function FlashcardBank() {
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-foreground truncate">{card.korean}</p>
                     <p className="text-sm text-muted-foreground truncate">{card.english}</p>
+                    {card.note && (
+                      <p className="text-xs text-muted-foreground italic truncate mt-0.5">{card.note}</p>
+                    )}
                     <div className="flex items-center gap-2 mt-1">
                       {card.category && (
                         <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground border-none">
@@ -129,14 +154,6 @@ export default function FlashcardBank() {
           </div>
         </AnimatePresence>
       )}
-
-      {/* FAB */}
-      <Link
-        to="/cards/new"
-        className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 soft-btn bg-primary text-primary-foreground h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg"
-      >
-        <Plus className="h-6 w-6" />
-      </Link>
     </div>
   );
 }

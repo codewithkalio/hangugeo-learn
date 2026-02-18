@@ -1,49 +1,38 @@
-import { useState, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Edit2 } from 'lucide-react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import type { Flashcard } from '@/lib/types';
+
+const hasHangul = (str: string) => /[\u3131-\uD79D]/.test(str);
 
 export default function FlashcardForm() {
   const { data, addFlashcard, updateFlashcard, addCategory } = useApp();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const isEdit = Boolean(id);
   const existing = id ? data.flashcards.find(c => c.id === id) : null;
 
-  const [korean, setKorean] = useState(existing?.korean || '');
-  const [english, setEnglish] = useState(existing?.english || '');
+  const q = (!isEdit && searchParams.get('q')) || '';
+  const [korean, setKorean] = useState(existing?.korean || (hasHangul(q) ? q : ''));
+  const [english, setEnglish] = useState(existing?.english || (!hasHangul(q) ? q : ''));
   const [category, setCategory] = useState(existing?.category || '');
   const [note, setNote] = useState(existing?.note || '');
   const [newCategory, setNewCategory] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const similarCards = useMemo((): Flashcard[] => {
-    const q = korean.trim();
-    if (q.length < 1) return [];
-    return data.flashcards
-      .filter((card) => {
-        if (isEdit && id && card.id === id) return false;
-        const k = card.korean.trim();
-        if (k === q) return true;
-        const words = card.korean.split(/\s+/).map((w) => w.trim()).filter(Boolean);
-        return words.some((word) => word === q);
-      })
-      .sort((a, b) => {
-        const aExact = a.korean.trim() === q ? 1 : 0;
-        const bExact = b.korean.trim() === q ? 1 : 0;
-        return bExact - aExact;
-      })
-      .slice(0, 10);
-  }, [korean, data.flashcards, isEdit, id]);
+  const koreanRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    koreanRef.current?.focus();
+  }, []);
 
   const handleSave = async () => {
     if (!korean.trim() || !english.trim()) {
@@ -91,19 +80,13 @@ export default function FlashcardForm() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         {/* Korean Field */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
-            {similarCards.length > 0 && (
-              <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground border-none">
-                Similar cards found
-              </Badge>
-            )}
-          </div>
+          <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
           <Input
+            ref={koreanRef}
             value={korean}
             onChange={e => setKorean(e.target.value)}
             placeholder="한국어 단어..."
-            className={`soft-inset border-none bg-background text-lg ${similarCards.length > 0 ? 'ring-2 ring-muted-foreground/50' : ''}`}
+            className="soft-inset border-none bg-background text-lg"
           />
         </div>
 
@@ -158,8 +141,6 @@ export default function FlashcardForm() {
           </div>
         </div>
 
-        
-
         {/* Save Button */}
         <motion.button
           whileTap={{ scale: 0.97 }}
@@ -171,47 +152,6 @@ export default function FlashcardForm() {
           {isSaving ? 'Saving...' : isEdit ? 'Update Card' : 'Save Card'}
         </motion.button>
       </motion.div>
-
-      {/* Similar cards in your bank */}
-      {similarCards.length > 0 && (
-        <>
-          <hr className="border-border my-4" />
-          <div className="space-y-2">
-            <h2 className="text-sm font-display font-bold text-muted-foreground">
-            Similar cards in your bank
-          </h2>
-          <div className="space-y-2">
-            {similarCards.map((card) => (
-              <div
-                key={card.id}
-                className="soft-card p-4 flex items-center gap-3"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-foreground truncate">{card.korean}</p>
-                  <p className="text-sm text-muted-foreground truncate">{card.english}</p>
-                  {card.category && (
-                    <Badge
-                      variant="secondary"
-                      className="mt-1 text-[10px] bg-muted text-muted-foreground border-none"
-                    >
-                      {card.category}
-                    </Badge>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/cards/edit/${card.id}`)}
-                  className="p-2 rounded-xl hover:bg-muted transition-colors"
-                  aria-label={`Edit ${card.korean}`}
-                >
-                  <Edit2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-              </div>
-            ))}
-          </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }

@@ -39,7 +39,7 @@ export default function Dashboard() {
           <Zap className="h-6 w-6" />
           <span className="font-display font-bold text-sm">Start Drill</span>
         </Link>
-        <Link to="/cards/new" className="soft-btn bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
+        <Link to="/cards" className="soft-btn bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
           <BookOpen className="h-6 w-6" />
           <span className="font-display font-bold text-sm">Add Flashcard</span>
         </Link>
