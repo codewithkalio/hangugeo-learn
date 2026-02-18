@@ -1,43 +1,50 @@
 
 
-# Fix Error Logging for Flashcard Add
+# Fix "TypeError: Load failed" on Consecutive Card Adds (Mobile)
 
 ## Problem
-When adding a flashcard fails on mobile, the console logs show `[object Object]` instead of the actual error details. This makes debugging impossible. The Supabase error object needs to be serialized properly.
+On mobile browsers (iOS Chrome/Safari), adding two flashcards in a row fails on the second attempt with `TypeError: Load failed`. This is a well-known mobile browser issue where `fetch` requests are cancelled or disrupted -- often caused by page navigation triggering background refetches that interfere with subsequent requests.
 
 ## Root Cause
-`console.error('[addFlashcard] Supabase error:', error)` -- on mobile Safari/Chrome, complex objects are often rendered as `[object Object]` instead of being expanded. The error details (message, code, hint) are lost.
+After a successful save, `navigate('/cards')` fires, and `onSuccess` invalidates the flashcards query (triggering a refetch). When the user navigates back to `/cards/new` quickly, the previous refetch may still be in-flight or the browser's network layer is in a disrupted state, causing the next `fetch` to fail with "Load failed".
 
-## Changes
+## Solution: Add retry logic to the mutation
 
-### `src/hooks/useAppData.ts` -- Serialize error objects in all logging
+### `src/hooks/useAppData.ts`
 
-Update the `addFlashcardMut` error logging to use `JSON.stringify` so the full error is visible on mobile:
-
-```typescript
-// Before
-console.error('[addFlashcard] Supabase error:', error);
-
-// After
-console.error('[addFlashcard] Supabase error:', JSON.stringify(error));
-```
-
-Apply the same fix to:
-- `addFlashcardMut.onError`
-- `updateFlashcardMut` error logging
-- `updateFlashcardMut.onError`
-
-Also update `FlashcardForm.tsx` catch block:
+Add a simple retry wrapper and apply it to `addFlashcardMut.mutationFn`:
 
 ```typescript
-// Before
-console.error('[FlashcardForm] Save failed:', error);
-
-// After
-console.error('[FlashcardForm] Save failed:', JSON.stringify(error));
+async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      if (i === retries || !err?.message?.includes('Load failed')) throw err;
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw new Error('Unreachable');
+}
 ```
 
-This will reveal the actual Supabase error (e.g., RLS violation, column mismatch, network error) so we can fix the underlying issue.
+Wrap the Supabase insert call inside `retryFetch(...)` so that transient "Load failed" errors are automatically retried (up to 2 retries with 500ms delay).
 
-## Why not fix the root cause directly?
-Without seeing the actual error message, we cannot determine the root cause. This logging fix is the necessary first step. Once deployed, reproducing the error will give us the exact Supabase error details to resolve the underlying issue.
+Apply the same pattern to `updateFlashcardMut` for consistency.
+
+### `src/main.tsx` (or QueryClient config)
+
+Also configure `react-query`'s global retry to handle transient network errors:
+
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    mutations: { retry: 1 },
+  },
+});
+```
+
+This provides a two-layer safety net: the custom retry for "Load failed" specifically, and react-query's built-in retry as a fallback.
+
+## No other files affected.
+
