@@ -4,6 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Flashcard, DrillResult } from '@/lib/types';
 
+async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      if (i === retries || !err?.message?.includes('Load failed')) throw err;
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw new Error('Unreachable');
+}
+
 const DEFAULT_CATEGORIES = ['Noun', 'Grammar Point', 'Modifier', 'Particle', 'Verb'];
 
 export function useAppData() {
@@ -88,17 +100,19 @@ export function useAppData() {
   const addFlashcardMut = useMutation({
     mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
       console.log('[addFlashcard] Inserting card:', { korean: card.korean, english: card.english, category: card.category, note: card.note });
-      const { data, error } = await supabase
-        .from('flashcards')
-        .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
-        .select()
-        .single();
-      if (error) {
-        console.error('[addFlashcard] Supabase error:', JSON.stringify(error));
-        throw error;
-      }
-      console.log('[addFlashcard] Success:', data);
-      return data;
+      return retryFetch(async () => {
+        const { data, error } = await supabase
+          .from('flashcards')
+          .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
+          .select()
+          .single();
+        if (error) {
+          console.error('[addFlashcard] Supabase error:', JSON.stringify(error));
+          throw error;
+        }
+        console.log('[addFlashcard] Success:', data);
+        return data;
+      });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
     onError: (error) => console.error('[addFlashcard] Mutation error:', JSON.stringify(error)),
@@ -107,17 +121,19 @@ export function useAppData() {
   const updateFlashcardMut = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Flashcard> }) => {
       console.log('[updateFlashcard] Updating card:', { id, updates });
-      const mapped: Record<string, unknown> = {};
-      if (updates.korean !== undefined) mapped.korean = updates.korean;
-      if (updates.english !== undefined) mapped.english = updates.english;
-      if (updates.category !== undefined) mapped.category = updates.category ?? null;
-      if (updates.note !== undefined) mapped.note = updates.note ?? null;
-      const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
-      if (error) {
-        console.error('[updateFlashcard] Supabase error:', JSON.stringify(error));
-        throw error;
-      }
-      console.log('[updateFlashcard] Success');
+      return retryFetch(async () => {
+        const mapped: Record<string, unknown> = {};
+        if (updates.korean !== undefined) mapped.korean = updates.korean;
+        if (updates.english !== undefined) mapped.english = updates.english;
+        if (updates.category !== undefined) mapped.category = updates.category ?? null;
+        if (updates.note !== undefined) mapped.note = updates.note ?? null;
+        const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
+        if (error) {
+          console.error('[updateFlashcard] Supabase error:', JSON.stringify(error));
+          throw error;
+        }
+        console.log('[updateFlashcard] Success');
+      });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
     onError: (error) => console.error('[updateFlashcard] Mutation error:', JSON.stringify(error)),
