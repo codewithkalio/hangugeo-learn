@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles, Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Flashcard } from '@/lib/types';
-import { hasWeakWords } from '@/lib/boostHelpers';
+import { hasWeakWords, speakKorean } from '@/lib/boostHelpers';
 
 type DrillPhase = 'setup' | 'drill' | 'summary';
 type Direction = 'kr-to-en' | 'en-to-kr';
@@ -309,9 +309,19 @@ export default function FlashcardDrill() {
       >
         <div className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center">
           <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
-          <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
-            {flipped ? back : front}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
+              {flipped ? back : front}
+            </p>
+            {((!flipped && direction === 'kr-to-en') || (flipped && direction === 'en-to-kr')) && (
+              <button
+                onClick={(e) => { e.stopPropagation(); speakKorean(currentCard.korean); }}
+                className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Volume2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           {flipped && currentCard.category && (
             <Badge variant="secondary" className="mt-3 bg-muted text-muted-foreground border-none text-xs">
               {currentCard.category}
