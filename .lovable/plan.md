@@ -1,56 +1,89 @@
 
 
-# Fix: Search Input Focus Issue on iOS After Card Creation
+# Word Boost -- Reinforcement Activity (MVP)
 
-## Problem
-After creating a card and navigating back to the Flashcards page, iOS requires multiple taps to focus the search input and bring up the keyboard. This happens because:
+## Overview
 
-1. The `useEffect` fires `searchRef.current?.focus()` immediately on mount
-2. But at that point, React Query is invalidating/refetching flashcards data, causing re-renders
-3. The AnimatePresence animations are also running (each card animates in with a staggered delay)
-4. These re-renders and layout shifts steal or reset focus on iOS, which is stricter than desktop browsers about maintaining focus during DOM mutations
+A post-drill activity called **Word Boost** that reinforces weak words through four mini-activity rounds with audio (Web Speech API) and visuals (Unsplash images for concrete nouns, colored Lucide icons for abstract concepts).
 
-## Solution
-Replace the immediate `useEffect` focus with a delayed focus that waits for the initial data refetch and animations to settle. Additionally, on iOS specifically, programmatic `.focus()` outside a user gesture context won't open the keyboard -- so we should set the input's `autoFocus` attribute as a secondary mechanism and use a `requestAnimationFrame` + `setTimeout` combination to catch the right moment.
+## Word Selection Logic (Updated)
 
-### Changes
+The selection follows a two-tier fallback:
 
-**`src/pages/FlashcardBank.tsx`**
+1. **First choice**: Pick words rated confidence 1-2 from the most recent drill session results
+2. **Fallback**: If fewer than 5 weak words came from the session, fill remaining slots from the entire flashcard bank -- any card with `confidenceScore` of 1 or 2, sorted by highest `weight` first
+3. **Anchor words**: Always add 2-3 cards with `confidenceScore >= 3` for confidence boosting
+4. If the user has zero weak words anywhere (bank-wide), the "Boost Weak Words" button is hidden entirely
 
-Replace the current focus effect:
-
-```typescript
-useEffect(() => {
-  searchRef.current?.focus();
-}, []);
+```text
+Session weak words (conf 1-2)
+        |
+        v
+  >= 5 words? ----YES----> Use those 5
+        |
+        NO
+        v
+  Fill from bank (conf 1-2, sorted by weight desc)
+        |
+        v
+  >= 1 word total? --YES--> Use up to 5
+        |
+        NO
+        v
+  Hide Boost button
 ```
 
-With a delayed version that waits for re-renders to settle:
+## User Flow
 
-```typescript
-useEffect(() => {
-  // Delay focus to let query refetches and entry animations settle.
-  // On iOS, immediate focus during re-renders gets lost.
-  const timer = setTimeout(() => {
-    searchRef.current?.focus();
-  }, 300);
-  return () => clearTimeout(timer);
-}, []);
+1. User completes a drill and sees the Summary screen
+2. If weak words exist (from session or bank), a "Boost Weak Words" button appears
+3. Tapping it launches `/boost` with 4 sequential rounds:
+   - **Listen and Choose**: Korean audio plays; pick correct English from 4 options
+   - **Picture Match**: See image/icon; pick correct Korean word from 4 options
+   - **Match Pairs**: 4x3 memory grid, tap to match Korean-English pairs
+   - **Type It Out**: See English + hear Korean; type the Korean answer
+4. Boost Summary shows accuracy and encouragement
+
+## Audio -- Web Speech API
+
+- `speakKorean(text)` helper using `SpeechSynthesisUtterance` with `lang: 'ko-KR'`
+- Speaker icon button for replay
+- If `speechSynthesis` unavailable, skip Listen and Choose round and hide speaker buttons
+
+## Visuals -- Unsplash + Lucide Icons
+
+- **Unsplash**: Supabase Edge Function `fetch-image` proxies search API, returns small photo URL for concrete nouns
+- **Lucide Icons**: Mapping of abstract categories to icon + color combos (e.g., verbs -> Zap/orange, feelings -> Heart/red, time -> Clock/green)
+- Rendered as large colored icons on a soft background circle
+
+## New Files
+
+- `src/pages/WordBoost.tsx` -- Main page with phase management (listen-choose, picture-match, match-pairs, type-it, summary)
+- `src/components/boost/ListenChoose.tsx` -- Audio quiz round
+- `src/components/boost/PictureMatch.tsx` -- Visual association round
+- `src/components/boost/MatchPairs.tsx` -- Memory grid round
+- `src/components/boost/TypeItOut.tsx` -- Active recall typing round
+- `src/components/boost/BoostSummary.tsx` -- Results and encouragement
+- `src/lib/boostHelpers.ts` -- `speakKorean()`, `pickBoostWords()`, `getIconForWord()`, `shuffleArray()`
+- `supabase/functions/fetch-image/index.ts` -- Unsplash proxy edge function
+
+## Changes to Existing Files
+
+- **`src/pages/FlashcardDrill.tsx`**: Add "Boost Weak Words" button in summary phase; pass session card results + IDs via route state to `/boost`; only show button if weak words exist in session OR bank
+- **`src/App.tsx`**: Add `/boost` route (protected, with AppLayout)
+
+## `pickBoostWords` Logic Detail
+
+```text
+function pickBoostWords(allCards, sessionResults?):
+  1. sessionWeak = session cards rated 1-2 (if session provided)
+  2. bankWeak = all cards with confidenceScore 1-2, excluding already-picked session cards
+  3. weakPool = [...sessionWeak, ...bankWeak sorted by weight desc].slice(0, 5)
+  4. anchorPool = cards with confidenceScore >= 3, excluding weakPool, shuffled, take 2-3
+  5. return { weakWords: weakPool, anchorWords: anchorPool }
 ```
 
-Also add `autoFocus` to the Input element as a belt-and-suspenders approach -- this helps on first navigation (before any re-renders interfere):
+## Secret Required
 
-```tsx
-<Input
-  ref={searchRef}
-  autoFocus
-  placeholder="Search cards..."
-  ...
-/>
-```
-
-### Why This Works
-- The 300ms delay lets React Query's refetch complete and AnimatePresence finish its initial render pass
-- `autoFocus` gives the browser a native hint to focus on mount (works better than programmatic focus on some mobile browsers)
-- The cleanup function prevents the focus from firing if the user navigates away quickly
+- `UNSPLASH_ACCESS_KEY` -- from a free Unsplash developer account (unsplash.com/developers)
 
