@@ -1,0 +1,138 @@
+import { useState, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useApp } from '@/contexts/AppContext';
+import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
+import ListenChoose from '@/components/boost/ListenChoose';
+import PictureMatch from '@/components/boost/PictureMatch';
+import MatchPairs from '@/components/boost/MatchPairs';
+import TypeItOut from '@/components/boost/TypeItOut';
+import BoostSummary from '@/components/boost/BoostSummary';
+
+type Phase = 'listen-choose' | 'picture-match' | 'match-pairs' | 'type-it' | 'summary';
+
+interface RoundResult {
+  round: string;
+  correct: number;
+  total: number;
+}
+
+export default function WordBoost() {
+  const { data } = useApp();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const sessionResults = (location.state as any)?.sessionResults as
+    | { cardId: string; confidence: number }[]
+    | undefined;
+
+  const { weakWords, allWords } = useMemo(
+    () => pickBoostWords(data.flashcards, sessionResults),
+    [data.flashcards, sessionResults],
+  );
+
+  const hasAudio = isSpeechAvailable();
+  const initialPhase: Phase = hasAudio ? 'listen-choose' : 'picture-match';
+
+  const [phase, setPhase] = useState<Phase>(initialPhase);
+  const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
+
+  const advancePhase = (result: RoundResult) => {
+    const updated = [...roundResults, result];
+    setRoundResults(updated);
+
+    const nextMap: Record<Phase, Phase> = {
+      'listen-choose': 'picture-match',
+      'picture-match': 'match-pairs',
+      'match-pairs': 'type-it',
+      'type-it': 'summary',
+      'summary': 'summary',
+    };
+    setPhase(nextMap[phase]);
+  };
+
+  if (weakWords.length === 0) {
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 py-12">
+        <p className="text-4xl">🎉</p>
+        <h1 className="text-xl font-display font-bold">No weak words!</h1>
+        <p className="text-sm text-muted-foreground">You're doing great. Keep drilling to maintain your streak.</p>
+        <button onClick={() => navigate('/')} className="soft-btn bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-display font-bold">
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-md mx-auto space-y-4">
+      {phase !== 'summary' && (
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-display font-bold">⚡ Word Boost</h1>
+        </div>
+      )}
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={phase}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -30 }}
+          transition={{ duration: 0.25 }}
+        >
+          {phase === 'listen-choose' && (
+            <ListenChoose
+              words={weakWords}
+              allPool={allWords}
+              onComplete={r => advancePhase({
+                round: 'Listen & Choose',
+                correct: r.filter(x => x.correct).length,
+                total: r.length,
+              })}
+            />
+          )}
+
+          {phase === 'picture-match' && (
+            <PictureMatch
+              words={weakWords}
+              allPool={allWords}
+              onComplete={r => advancePhase({
+                round: 'Picture Match',
+                correct: r.filter(x => x.correct).length,
+                total: r.length,
+              })}
+            />
+          )}
+
+          {phase === 'match-pairs' && (
+            <MatchPairs
+              words={allWords}
+              onComplete={(matched, total) => advancePhase({
+                round: 'Match Pairs',
+                correct: matched,
+                total,
+              })}
+            />
+          )}
+
+          {phase === 'type-it' && (
+            <TypeItOut
+              words={weakWords}
+              onComplete={r => advancePhase({
+                round: 'Type It Out',
+                correct: r.filter(x => x.correct).length,
+                total: r.length,
+              })}
+            />
+          )}
+
+          {phase === 'summary' && <BoostSummary rounds={roundResults} />}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
