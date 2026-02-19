@@ -42,7 +42,7 @@ export default function TypeItOut({ words, onComplete }: Props) {
       } else {
         setIdx(i => i + 1);
       }
-    }, 1500);
+    }, correct ? 1500 : 3000);
   };
 
   if (!current) return null;
