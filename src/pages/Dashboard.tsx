@@ -2,6 +2,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
 import { BookOpen, Zap, Target, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { hasWeakWords } from '@/lib/boostHelpers';
 
 export default function Dashboard() {
   const { data } = useApp();
@@ -13,6 +14,7 @@ export default function Dashboard() {
     : 0;
   const confidencePct = Math.round((avgConfidence / 4) * 100);
   const dueCards = data.flashcards.filter(c => c.weight >= 3).length;
+  const hasWeak = hasWeakWords(data.flashcards);
 
   const fadeUp = {
     hidden: { opacity: 0, y: 16 },
@@ -44,6 +46,19 @@ export default function Dashboard() {
           <span className="font-display font-bold text-sm">Add Flashcard</span>
         </Link>
       </motion.div>
+
+      {/* Word Boost */}
+      {hasWeak && (
+        <motion.div initial="hidden" animate="visible" custom={1.5} variants={fadeUp}>
+          <Link to="/boost" className="soft-btn bg-secondary text-secondary-foreground p-4 rounded-2xl flex items-center gap-3 w-full">
+            <span className="text-xl">⚡</span>
+            <div className="text-left">
+              <span className="font-display font-bold text-sm block">Word Boost</span>
+              <span className="text-xs opacity-70">Reinforce your weak words</span>
+            </div>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Stats Cards */}
       <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-3 gap-3">
