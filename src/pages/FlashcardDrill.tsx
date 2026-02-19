@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Brain, FolderOpen } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Flashcard } from '@/lib/types';
+import { hasWeakWords } from '@/lib/boostHelpers';
 
 type DrillPhase = 'setup' | 'drill' | 'summary';
 type Direction = 'kr-to-en' | 'en-to-kr';
@@ -212,6 +213,7 @@ export default function FlashcardDrill() {
       .filter(r => r.confidence <= 2)
       .map(r => data.flashcards.find(c => c.id === r.cardId)!)
       .filter(Boolean);
+    const showBoost = hasWeakWords(data.flashcards, results);
 
     const avgConfidence = results.length > 0
       ? (results.reduce((s, r) => s + r.confidence, 0) / results.length).toFixed(1)
@@ -254,13 +256,23 @@ export default function FlashcardDrill() {
             </div>
           )}
 
-          <div className="flex gap-2">
-            <button onClick={() => setPhase('setup')} className="flex-1 soft-btn bg-card py-3 rounded-2xl font-display font-bold text-sm flex items-center justify-center gap-2">
-              <RotateCcw className="h-4 w-4" /> Again
-            </button>
-            <button onClick={() => navigate('/')} className="flex-1 soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold text-sm">
-              Done
-            </button>
+          <div className="flex flex-col gap-2">
+            {showBoost && (
+              <button
+                onClick={() => navigate('/boost', { state: { sessionResults: results } })}
+                className="w-full soft-btn bg-accent text-accent-foreground py-3 rounded-2xl font-display font-bold text-sm flex items-center justify-center gap-2"
+              >
+                <Sparkles className="h-4 w-4" /> Boost Weak Words
+              </button>
+            )}
+            <div className="flex gap-2">
+              <button onClick={() => setPhase('setup')} className="flex-1 soft-btn bg-card py-3 rounded-2xl font-display font-bold text-sm flex items-center justify-center gap-2">
+                <RotateCcw className="h-4 w-4" /> Again
+              </button>
+              <button onClick={() => navigate('/')} className="flex-1 soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold text-sm">
+                Done
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>
