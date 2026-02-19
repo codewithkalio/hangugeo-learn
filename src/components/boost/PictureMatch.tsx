@@ -81,14 +81,14 @@ export default function PictureMatch({ words, allPool, onComplete }: Props) {
         <p className="text-sm text-muted-foreground">{idx + 1} / {words.length}</p>
       </div>
 
-      <div className="soft-card p-8 flex flex-col items-center justify-center min-h-[180px]">
+      <div className="soft-card p-6 sm:p-8 flex flex-col items-center justify-center min-h-[140px] sm:min-h-[180px]">
         {imgLoading ? (
-          <div className="w-24 h-24 rounded-full bg-muted animate-pulse" />
+          <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-muted animate-pulse" />
         ) : imageUrl ? (
           <img
             src={imageUrl}
             alt={current.english}
-            className="w-32 h-32 rounded-2xl object-cover shadow-md"
+            className="w-20 h-20 sm:w-32 sm:h-32 rounded-2xl object-cover shadow-md"
           />
         ) : (
           <div className={`w-24 h-24 rounded-full ${iconMapping.bgColor} flex items-center justify-center`}>
