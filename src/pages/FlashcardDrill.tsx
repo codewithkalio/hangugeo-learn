@@ -309,17 +309,19 @@ export default function FlashcardDrill() {
       >
         <div className="soft-card p-8 min-h-[200px] flex flex-col items-center justify-center text-center">
           <p className="text-xs text-muted-foreground mb-2 font-medium">{flipped ? 'Answer' : 'Tap to flip'}</p>
-          <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
-            {flipped ? back : front}
-          </p>
-          {((!flipped && direction === 'kr-to-en') || (flipped && direction === 'en-to-kr')) && (
-            <button
-              onClick={(e) => { e.stopPropagation(); speakKorean(currentCard.korean); }}
-              className="mt-4 p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-            >
-              <Volume2 className="h-4 w-4" />
-            </button>
-          )}
+          <div className="flex items-center justify-center gap-3">
+            <p className={`font-display font-bold ${flipped ? 'text-3xl' : 'text-2xl'} text-foreground`}>
+              {flipped ? back : front}
+            </p>
+            {((!flipped && direction === 'kr-to-en') || (flipped && direction === 'en-to-kr')) && (
+              <button
+                onClick={(e) => { e.stopPropagation(); speakKorean(currentCard.korean); }}
+                className="p-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Volume2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           {flipped && currentCard.category && (
             <Badge variant="secondary" className="mt-3 bg-muted text-muted-foreground border-none text-xs">
               {currentCard.category}
