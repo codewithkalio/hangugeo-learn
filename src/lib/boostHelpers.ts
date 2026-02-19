@@ -16,7 +16,7 @@ export function speakKorean(text: string): void {
 
   const slow = new SpeechSynthesisUtterance(text);
   slow.lang = 'ko-KR';
-  slow.rate = 0.6;
+  slow.rate = 0.5;
 
   normal.onend = () => {
     setTimeout(() => window.speechSynthesis.speak(slow), 400);
