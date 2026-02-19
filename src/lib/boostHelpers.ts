@@ -9,10 +9,20 @@ import {
 export function speakKorean(text: string): void {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ko-KR';
-  utterance.rate = 0.85;
-  window.speechSynthesis.speak(utterance);
+
+  const normal = new SpeechSynthesisUtterance(text);
+  normal.lang = 'ko-KR';
+  normal.rate = 1.0;
+
+  const slow = new SpeechSynthesisUtterance(text);
+  slow.lang = 'ko-KR';
+  slow.rate = 0.75;
+
+  normal.onend = () => {
+    setTimeout(() => window.speechSynthesis.speak(slow), 400);
+  };
+
+  window.speechSynthesis.speak(normal);
 }
 
 export function isSpeechAvailable(): boolean {
