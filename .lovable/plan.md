@@ -1,89 +1,85 @@
 
 
-# Word Boost -- Reinforcement Activity (MVP)
+# Verb Conjugation Practice
 
-## Overview
+## What's Being Built
 
-A post-drill activity called **Word Boost** that reinforces weak words through four mini-activity rounds with audio (Web Speech API) and visuals (Unsplash images for concrete nouns, colored Lucide icons for abstract concepts).
+A new **Conjugation Practice** activity where you transform Korean sentences between grammar patterns by tapping morpheme tiles. You'll select which grammar patterns you've learned in Settings, and the activity generates exercises from your flashcard vocabulary. Sessions are 5 questions each, with one retry allowed and rule-specific explanations on failure.
 
-## Word Selection Logic (Updated)
+The activity launches from the **Home page only** -- no new nav entries in the bottom bar or sidebar.
 
-The selection follows a two-tier fallback:
+---
 
-1. **First choice**: Pick words rated confidence 1-2 from the most recent drill session results
-2. **Fallback**: If fewer than 5 weak words came from the session, fill remaining slots from the entire flashcard bank -- any card with `confidenceScore` of 1 or 2, sorted by highest `weight` first
-3. **Anchor words**: Always add 2-3 cards with `confidenceScore >= 3` for confidence boosting
-4. If the user has zero weak words anywhere (bank-wide), the "Boost Weak Words" button is hidden entirely
+## How It Works
 
-```text
-Session weak words (conf 1-2)
-        |
-        v
-  >= 5 words? ----YES----> Use those 5
-        |
-        NO
-        v
-  Fill from bank (conf 1-2, sorted by weight desc)
-        |
-        v
-  >= 1 word total? --YES--> Use up to 5
-        |
-        NO
-        v
-  Hide Boost button
-```
+1. **Settings** -- A new "Grammar Patterns I've Learned" section with 26 patterns in three collapsible groups (Early, Intermediate, Advanced). Check/uncheck freely.
+2. **Home page** -- A new quick-action card appears when you have at least one pattern enabled and enough verbs/nouns in your flashcard bank.
+3. **Practice session** -- 5 transformation questions per session. Each shows a sentence in informal polite present and asks you to conjugate it to a target pattern using morpheme tiles.
+4. **Feedback** -- Correct on first try = advance. Wrong = one retry with tiles staying in place. Wrong again = show correct answer with an explanation of the rule.
+5. **Results** -- Summary screen consistent with existing Drill and Word Boost patterns, with per-pattern accuracy tracking.
 
-## User Flow
+---
 
-1. User completes a drill and sees the Summary screen
-2. If weak words exist (from session or bank), a "Boost Weak Words" button appears
-3. Tapping it launches `/boost` with 4 sequential rounds:
-   - **Listen and Choose**: Korean audio plays; pick correct English from 4 options
-   - **Picture Match**: See image/icon; pick correct Korean word from 4 options
-   - **Match Pairs**: 4x3 memory grid, tap to match Korean-English pairs
-   - **Type It Out**: See English + hear Korean; type the Korean answer
-4. Boost Summary shows accuracy and encouragement
+## Implementation Sequence
 
-## Audio -- Web Speech API
+### Step 1: Database Tables and RLS
 
-- `speakKorean(text)` helper using `SpeechSynthesisUtterance` with `lang: 'ko-KR'`
-- Speaker icon button for replay
-- If `speechSynthesis` unavailable, skip Listen and Choose round and hide speaker buttons
+Two new tables:
 
-## Visuals -- Unsplash + Lucide Icons
+**grammar_patterns**
+- id, user_id, pattern_key, enabled, times_practiced, correct_first_attempt, correct_second_attempt, total_attempts, last_practiced_at, confidence_score (default 0), weight (default 4), consecutive_fluent (default 0)
+- Unique constraint on (user_id, pattern_key)
+- RLS: users CRUD only their own rows
 
-- **Unsplash**: Supabase Edge Function `fetch-image` proxies search API, returns small photo URL for concrete nouns
-- **Lucide Icons**: Mapping of abstract categories to icon + color combos (e.g., verbs -> Zap/orange, feelings -> Heart/red, time -> Clock/green)
-- Rendered as large colored icons on a soft background circle
+**conjugation_results**
+- id, user_id, date, total_questions, correct_first, correct_second, incorrect, questions (jsonb)
+- RLS: users CRUD only their own rows
 
-## New Files
+### Step 2: Types and Static Data
 
-- `src/pages/WordBoost.tsx` -- Main page with phase management (listen-choose, picture-match, match-pairs, type-it, summary)
-- `src/components/boost/ListenChoose.tsx` -- Audio quiz round
-- `src/components/boost/PictureMatch.tsx` -- Visual association round
-- `src/components/boost/MatchPairs.tsx` -- Memory grid round
-- `src/components/boost/TypeItOut.tsx` -- Active recall typing round
-- `src/components/boost/BoostSummary.tsx` -- Results and encouragement
-- `src/lib/boostHelpers.ts` -- `speakKorean()`, `pickBoostWords()`, `getIconForWord()`, `shuffleArray()`
-- `supabase/functions/fetch-image/index.ts` -- Unsplash proxy edge function
+- **src/lib/types.ts** -- Add `GrammarPattern` and `ConjugationResult` interfaces
+- **src/lib/conjugationData.ts** -- All 26 pattern definitions (key, label, group, Korean suffix), sentence templates, and the `conjugate()` function handling vowel harmony, consonant/vowel stems, and irregular verbs via lookup table
 
-## Changes to Existing Files
+### Step 3: Conjugation Engine Helpers
 
-- **`src/pages/FlashcardDrill.tsx`**: Add "Boost Weak Words" button in summary phase; pass session card results + IDs via route state to `/boost`; only show button if weak words exist in session OR bank
-- **`src/App.tsx`**: Add `/boost` route (protected, with AppLayout)
+- **src/lib/conjugationHelpers.ts**
+  - `pickSessionQuestions()` -- selects 5 questions weighted by pattern performance
+  - `decomposeToTiles()` -- splits conjugated forms into morpheme tiles
+  - `generateDistractorTiles()` -- near-miss tiles (e.g. 았 vs 었)
+  - `getExplanation()` -- rule-specific feedback text
 
-## `pickBoostWords` Logic Detail
+### Step 4: Data Layer Updates
 
-```text
-function pickBoostWords(allCards, sessionResults?):
-  1. sessionWeak = session cards rated 1-2 (if session provided)
-  2. bankWeak = all cards with confidenceScore 1-2, excluding already-picked session cards
-  3. weakPool = [...sessionWeak, ...bankWeak sorted by weight desc].slice(0, 5)
-  4. anchorPool = cards with confidenceScore >= 3, excluding weakPool, shuffled, take 2-3
-  5. return { weakWords: weakPool, anchorWords: anchorPool }
-```
+- **src/hooks/useAppData.ts** -- Add queries for `grammar_patterns` and `conjugation_results`, plus mutations for toggling patterns, saving results, and updating pattern stats
+- **src/contexts/AppContext.tsx** -- Extend context type and fallback with grammar pattern data and mutations
 
-## Secret Required
+### Step 5: Settings UI
 
-- `UNSPLASH_ACCESS_KEY` -- from a free Unsplash developer account (unsplash.com/developers)
+- **src/components/settings/GrammarPatterns.tsx** -- Three collapsible groups with checkboxes for each pattern (Korean label + English description). Toggles persist to `grammar_patterns` table.
+- **src/pages/Settings.tsx** -- Add a "Grammar Patterns" card linking to the new component (inline or at `/settings/grammar`)
+
+### Step 6: Activity Components
+
+- **src/components/conjugation/TilePool.tsx** -- Two zones (construction area + tile pool), tap to move tiles between zones, auto-evaluate when correct tile count reached, generous tap target spacing
+- **src/components/conjugation/QuestionCard.tsx** -- Shows base sentence, English instruction, TilePool, and handles first-attempt / retry / show-answer states
+- **src/components/conjugation/ConjugationSummary.tsx** -- Results screen following existing BoostSummary pattern
+
+### Step 7: Main Page and Routing
+
+- **src/pages/ConjugationPractice.tsx** -- Manages intro -> drill (5 questions) -> summary flow. Checks for sufficient verbs/nouns and shows a message if not enough.
+- **src/App.tsx** -- Add `/conjugation` route (protected, with AppLayout)
+
+### Step 8: Dashboard Integration
+
+- **src/pages/Dashboard.tsx** -- Add a "Conjugation Practice" quick-action card (similar style to the Word Boost card), visible only when the user has enabled at least one grammar pattern AND has enough verbs and nouns in their flashcard bank
+
+---
+
+## Technical Notes
+
+- The conjugation engine handles Korean morphophonemic rules: vowel harmony (아/어), consonant vs vowel stem detection for (으) insertion, and a lookup table for common irregular verbs (ㅂ, ㄷ, ㅅ, ㅎ, 르, ㄹ irregulars)
+- Pattern weighting reuses the same CBR algorithm as flashcard drills -- patterns with low confidence scores surface more frequently
+- Vocabulary selection prefers high-confidence flashcards so the cognitive load stays on conjugation, not word recall
+- All user inputs in the tile interface are pre-defined morpheme options (no free-text input), so injection risk is minimal
+- No changes to BottomNav or DesktopSidebar
 
