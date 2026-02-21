@@ -12,6 +12,7 @@ import FlashcardBank from "./pages/FlashcardBank";
 import FlashcardForm from "./pages/FlashcardForm";
 import FlashcardDrill from "./pages/FlashcardDrill";
 import WordBoost from "./pages/WordBoost";
+import ConjugationPractice from "./pages/ConjugationPractice";
 import Settings from "./pages/Settings";
 import Stats from "./pages/Stats";
 import Auth from "./pages/Auth";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/cards/edit/:id" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
               <Route path="/drill" element={<ProtectedRoute><AppLayout><FlashcardDrill /></AppLayout></ProtectedRoute>} />
               <Route path="/boost" element={<ProtectedRoute><AppLayout><WordBoost /></AppLayout></ProtectedRoute>} />
+              <Route path="/conjugation" element={<ProtectedRoute><AppLayout><ConjugationPractice /></AppLayout></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
               <Route path="/settings/stats" element={<ProtectedRoute><AppLayout><Stats /></AppLayout></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
