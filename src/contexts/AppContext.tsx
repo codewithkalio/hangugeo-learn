@@ -4,12 +4,14 @@ import { useAppData } from '@/hooks/useAppData';
 type AppContextType = ReturnType<typeof useAppData>;
 
 const fallback: AppContextType = {
-  data: { flashcards: [], drillResults: [], categories: [], streak: 0, lastDrillDate: null },
+  data: { flashcards: [], drillResults: [], categories: [], grammarPatterns: [], conjugationResults: [], streak: 0, lastDrillDate: null },
   addFlashcard: async () => ({}) as any,
   updateFlashcard: async () => {},
   deleteFlashcard: () => {},
   addCategory: () => {},
   addDrillResult: () => {},
+  toggleGrammarPattern: () => {},
+  addConjugationResult: () => {},
 };
 
 const AppContext = createContext<AppContextType>(fallback);
