@@ -15,10 +15,6 @@ export default function Dashboard() {
   const confidencePct = Math.round((avgConfidence / 4) * 100);
   const dueCards = data.flashcards.filter(c => c.weight >= 3).length;
   const hasWeak = hasWeakWords(data.flashcards);
-  const enabledPatterns = data.grammarPatterns.filter(p => p.enabled);
-  const hasVerbs = data.flashcards.some(f => f.category?.toLowerCase() === 'verb');
-  const hasNouns = data.flashcards.some(f => f.category?.toLowerCase() === 'noun');
-  const showConjugation = enabledPatterns.length > 0 && hasVerbs && hasNouns;
 
   const fadeUp = {
     hidden: { opacity: 0, y: 16 },
@@ -64,18 +60,6 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* Conjugation Practice */}
-      {showConjugation && (
-        <motion.div initial="hidden" animate="visible" custom={1.7} variants={fadeUp}>
-          <Link to="/conjugation" className="soft-btn bg-card text-foreground border border-primary/20 p-4 rounded-2xl flex items-center gap-3 w-full">
-            <span className="text-xl">🔤</span>
-            <div className="text-left">
-              <span className="font-display font-bold text-sm block">Conjugation Practice</span>
-              <span className="text-xs text-muted-foreground">{enabledPatterns.length} pattern{enabledPatterns.length !== 1 ? 's' : ''} enabled</span>
-            </div>
-          </Link>
-        </motion.div>
-      )}
 
       {/* Stats Cards */}
       <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-3 gap-3">

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Flashcard, DrillResult, GrammarPattern, ConjugationResult, ConjugationQuestion } from '@/lib/types';
+import { Flashcard, DrillResult } from '@/lib/types';
 
 async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
   for (let i = 0; i <= retries; i++) {
@@ -96,53 +96,8 @@ export function useAppData() {
     enabled: !!userId,
   });
 
-  // ── Grammar Patterns ──
-  const { data: grammarPatterns = [] } = useQuery({
-    queryKey: ['grammarPatterns', userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('grammar_patterns')
-        .select('*')
-        .order('pattern_key');
-      if (error) throw error;
-      return (data ?? []).map(row => ({
-        id: row.id,
-        patternKey: row.pattern_key,
-        enabled: row.enabled,
-        timesPracticed: row.times_practiced,
-        correctFirstAttempt: row.correct_first_attempt,
-        correctSecondAttempt: row.correct_second_attempt,
-        totalAttempts: row.total_attempts,
-        lastPracticedAt: row.last_practiced_at,
-        confidenceScore: row.confidence_score,
-        weight: row.weight,
-        consecutiveFluent: row.consecutive_fluent,
-      })) as GrammarPattern[];
-    },
-    enabled: !!userId,
-  });
 
-  // ── Conjugation Results ──
-  const { data: conjugationResults = [] } = useQuery({
-    queryKey: ['conjugationResults', userId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('conjugation_results')
-        .select('*')
-        .order('date', { ascending: false });
-      if (error) throw error;
-      return (data ?? []).map(row => ({
-        id: row.id,
-        date: row.date,
-        totalQuestions: row.total_questions,
-        correctFirst: row.correct_first,
-        correctSecond: row.correct_second,
-        incorrect: row.incorrect,
-        questions: row.questions as unknown as ConjugationQuestion[],
-      })) as ConjugationResult[];
-    },
-    enabled: !!userId,
-  });
+
 
   // ── Mutations ──
   const addFlashcardMut = useMutation({
@@ -235,63 +190,6 @@ export function useAppData() {
     },
   });
 
-  const toggleGrammarPatternMut = useMutation({
-    mutationFn: async ({ patternKey, enabled }: { patternKey: string; enabled: boolean }) => {
-      const existing = grammarPatterns.find(p => p.patternKey === patternKey);
-      if (existing) {
-        const { error } = await supabase.from('grammar_patterns').update({ enabled }).eq('id', existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('grammar_patterns').insert({
-          user_id: userId!, pattern_key: patternKey, enabled,
-        });
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['grammarPatterns', userId] }),
-  });
-
-  const addConjugationResultMut = useMutation({
-    mutationFn: async (result: Omit<ConjugationResult, 'id' | 'date'>) => {
-      const { error } = await supabase.from('conjugation_results').insert({
-        user_id: userId!,
-        total_questions: result.totalQuestions,
-        correct_first: result.correctFirst,
-        correct_second: result.correctSecond,
-        incorrect: result.incorrect,
-        questions: result.questions as unknown as Record<string, unknown>[],
-      } as any);
-      if (error) throw error;
-
-      // Update grammar pattern stats
-      for (const q of result.questions) {
-        const pattern = grammarPatterns.find(p => p.patternKey === q.patternKey);
-        if (!pattern) continue;
-        const isFirst = q.resultFirstAttempt === true;
-        const isSecond = q.resultSecondAttempt === true;
-        const correct = isFirst || isSecond;
-        const newConsecutiveFluent = isFirst ? pattern.consecutiveFluent + 1 : 0;
-        const newConfidence = isFirst ? 4 : isSecond ? 3 : 1;
-        let newWeight = 5 - newConfidence;
-        if (newConsecutiveFluent >= 5) newWeight = 1;
-
-        await supabase.from('grammar_patterns').update({
-          times_practiced: pattern.timesPracticed + 1,
-          correct_first_attempt: pattern.correctFirstAttempt + (isFirst ? 1 : 0),
-          correct_second_attempt: pattern.correctSecondAttempt + (isSecond ? 1 : 0),
-          total_attempts: pattern.totalAttempts + 1,
-          last_practiced_at: new Date().toISOString(),
-          confidence_score: newConfidence,
-          weight: newWeight,
-          consecutive_fluent: newConsecutiveFluent,
-        }).eq('id', pattern.id);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grammarPatterns', userId] });
-      queryClient.invalidateQueries({ queryKey: ['conjugationResults', userId] });
-    },
-  });
 
   // ── Stable callbacks ──
   const addFlashcard = useCallback(
@@ -329,27 +227,14 @@ export function useAppData() {
     [addDrillResultMut]
   );
 
-  const toggleGrammarPattern = useCallback(
-    (patternKey: string, enabled: boolean) => {
-      toggleGrammarPatternMut.mutate({ patternKey, enabled });
-    },
-    [toggleGrammarPatternMut]
-  );
 
-  const addConjugationResult = useCallback(
-    (result: Omit<ConjugationResult, 'id' | 'date'>) => {
-      addConjugationResultMut.mutate(result);
-    },
-    [addConjugationResultMut]
-  );
+
 
   return {
     data: {
       flashcards,
       drillResults,
       categories,
-      grammarPatterns,
-      conjugationResults,
       streak: 0,
       lastDrillDate: null,
     },
@@ -358,7 +243,5 @@ export function useAppData() {
     deleteFlashcard,
     addCategory,
     addDrillResult,
-    toggleGrammarPattern,
-    addConjugationResult,
   };
 }

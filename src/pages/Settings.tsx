@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, Upload, ChevronRight, BookOpen } from 'lucide-react';
+import { LogOut, BarChart3, Upload, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CsvImport from '@/pages/CsvImport';
-import GrammarPatterns from '@/components/settings/GrammarPatterns';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const [csvOpen, setCsvOpen] = useState(false);
-  const [grammarOpen, setGrammarOpen] = useState(false);
 
   const name = user?.user_metadata?.full_name || '';
   const email = user?.email || '';
@@ -48,22 +46,6 @@ export default function Settings() {
         <span className="flex-1 font-medium text-sm">Import CSV</span>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </button>
-
-      <div>
-        <button
-          onClick={() => setGrammarOpen(!grammarOpen)}
-          className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors w-full text-left"
-        >
-          <BookOpen className="h-5 w-5 text-primary" />
-          <span className="flex-1 font-medium text-sm">Grammar Patterns I've Learned</span>
-          <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${grammarOpen ? 'rotate-90' : ''}`} />
-        </button>
-        {grammarOpen && (
-          <div className="mt-3">
-            <GrammarPatterns />
-          </div>
-        )}
-      </div>
 
       <CsvImport open={csvOpen} onOpenChange={setCsvOpen} />
     </div>
