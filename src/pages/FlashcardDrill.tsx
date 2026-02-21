@@ -322,7 +322,7 @@ export default function FlashcardDrill() {
               </button>
             )}
           </div>
-          {currentCard.category && (
+          {flipped && currentCard.category && (
             <Badge variant="secondary" className="mt-3 bg-muted text-muted-foreground border-none text-xs">
               {currentCard.category}
             </Badge>
