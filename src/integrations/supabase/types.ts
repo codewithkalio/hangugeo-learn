@@ -32,39 +32,6 @@ export type Database = {
         }
         Relationships: []
       }
-      conjugation_results: {
-        Row: {
-          correct_first: number
-          correct_second: number
-          date: string
-          id: string
-          incorrect: number
-          questions: Json
-          total_questions: number
-          user_id: string
-        }
-        Insert: {
-          correct_first: number
-          correct_second: number
-          date?: string
-          id?: string
-          incorrect: number
-          questions: Json
-          total_questions: number
-          user_id: string
-        }
-        Update: {
-          correct_first?: number
-          correct_second?: number
-          date?: string
-          id?: string
-          incorrect?: number
-          questions?: Json
-          total_questions?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       drill_results: {
         Row: {
           cards: Json
@@ -138,51 +105,6 @@ export type Database = {
           incorrect_count?: number
           korean?: string
           note?: string | null
-          user_id?: string
-          weight?: number
-        }
-        Relationships: []
-      }
-      grammar_patterns: {
-        Row: {
-          confidence_score: number
-          consecutive_fluent: number
-          correct_first_attempt: number
-          correct_second_attempt: number
-          enabled: boolean
-          id: string
-          last_practiced_at: string | null
-          pattern_key: string
-          times_practiced: number
-          total_attempts: number
-          user_id: string
-          weight: number
-        }
-        Insert: {
-          confidence_score?: number
-          consecutive_fluent?: number
-          correct_first_attempt?: number
-          correct_second_attempt?: number
-          enabled?: boolean
-          id?: string
-          last_practiced_at?: string | null
-          pattern_key: string
-          times_practiced?: number
-          total_attempts?: number
-          user_id: string
-          weight?: number
-        }
-        Update: {
-          confidence_score?: number
-          consecutive_fluent?: number
-          correct_first_attempt?: number
-          correct_second_attempt?: number
-          enabled?: boolean
-          id?: string
-          last_practiced_at?: string | null
-          pattern_key?: string
-          times_practiced?: number
-          total_attempts?: number
           user_id?: string
           weight?: number
         }
