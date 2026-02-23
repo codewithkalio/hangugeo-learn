@@ -9,6 +9,7 @@ export function initPostHog() {
     autocapture: true,
     capture_pageview: false, // We handle this manually in the provider
     capture_pageleave: true,
+    enable_recording_console_log: true,
     session_recording: {
       recordCrossOriginIframes: false,
     },
