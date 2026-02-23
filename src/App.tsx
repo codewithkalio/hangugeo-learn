@@ -13,6 +13,7 @@ import FlashcardForm from "./pages/FlashcardForm";
 import FlashcardDrill from "./pages/FlashcardDrill";
 import WordBoost from "./pages/WordBoost";
 
+import { PostHogProvider } from "./components/PostHogProvider";
 import Settings from "./pages/Settings";
 import Stats from "./pages/Stats";
 import Auth from "./pages/Auth";
@@ -32,19 +33,21 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AppProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
-              <Route path="/cards" element={<ProtectedRoute><AppLayout><FlashcardBank /></AppLayout></ProtectedRoute>} />
-              <Route path="/cards/new" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
-              <Route path="/cards/edit/:id" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
-              <Route path="/drill" element={<ProtectedRoute><AppLayout><FlashcardDrill /></AppLayout></ProtectedRoute>} />
-              <Route path="/boost" element={<ProtectedRoute><AppLayout><WordBoost /></AppLayout></ProtectedRoute>} />
-              
-              <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
-              <Route path="/settings/stats" element={<ProtectedRoute><AppLayout><Stats /></AppLayout></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <PostHogProvider>
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+                <Route path="/cards" element={<ProtectedRoute><AppLayout><FlashcardBank /></AppLayout></ProtectedRoute>} />
+                <Route path="/cards/new" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
+                <Route path="/cards/edit/:id" element={<ProtectedRoute><AppLayout><FlashcardForm /></AppLayout></ProtectedRoute>} />
+                <Route path="/drill" element={<ProtectedRoute><AppLayout><FlashcardDrill /></AppLayout></ProtectedRoute>} />
+                <Route path="/boost" element={<ProtectedRoute><AppLayout><WordBoost /></AppLayout></ProtectedRoute>} />
+                
+                <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+                <Route path="/settings/stats" element={<ProtectedRoute><AppLayout><Stats /></AppLayout></ProtectedRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </PostHogProvider>
           </AppProvider>
         </AuthProvider>
       </BrowserRouter>
