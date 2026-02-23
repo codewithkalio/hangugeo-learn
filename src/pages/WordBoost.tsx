@@ -5,12 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
 import ListenChoose from '@/components/boost/ListenChoose';
-import PictureMatch from '@/components/boost/PictureMatch';
 import MatchPairs from '@/components/boost/MatchPairs';
 import TypeItOut from '@/components/boost/TypeItOut';
 import BoostSummary from '@/components/boost/BoostSummary';
 
-type Phase = 'listen-choose' | 'picture-match' | 'match-pairs' | 'type-it' | 'summary';
+type Phase = 'listen-choose' | 'match-pairs' | 'type-it' | 'summary';
 
 interface RoundResult {
   round: string;
@@ -33,7 +32,7 @@ export default function WordBoost() {
   );
 
   const hasAudio = isSpeechAvailable();
-  const initialPhase: Phase = hasAudio ? 'listen-choose' : 'picture-match';
+  const initialPhase: Phase = hasAudio ? 'listen-choose' : 'match-pairs';
 
   const [phase, setPhase] = useState<Phase>(initialPhase);
   const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
@@ -43,8 +42,7 @@ export default function WordBoost() {
     setRoundResults(updated);
 
     const nextMap: Record<Phase, Phase> = {
-      'listen-choose': 'picture-match',
-      'picture-match': 'match-pairs',
+      'listen-choose': 'match-pairs',
       'match-pairs': 'type-it',
       'type-it': 'summary',
       'summary': 'summary',
@@ -90,18 +88,6 @@ export default function WordBoost() {
               allPool={allWords}
               onComplete={r => advancePhase({
                 round: 'Listen & Choose',
-                correct: r.filter(x => x.correct).length,
-                total: r.length,
-              })}
-            />
-          )}
-
-          {phase === 'picture-match' && (
-            <PictureMatch
-              words={weakWords}
-              allPool={allWords}
-              onComplete={r => advancePhase({
-                round: 'Picture Match',
                 correct: r.filter(x => x.correct).length,
                 total: r.length,
               })}

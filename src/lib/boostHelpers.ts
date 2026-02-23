@@ -1,8 +1,4 @@
 import { Flashcard } from '@/lib/types';
-import {
-  Zap, Heart, Clock, BookOpen, MessageCircle, Hash, Star, Compass,
-  type LucideIcon,
-} from 'lucide-react';
 
 // ── Audio ──
 
@@ -91,38 +87,6 @@ export function shuffleArray<T>(arr: T[]): T[] {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-// ── Icon Mapping for Abstract Words ──
-
-interface IconMapping {
-  icon: LucideIcon;
-  color: string; // tailwind class
-  bgColor: string;
-}
-
-const CATEGORY_ICON_MAP: Record<string, IconMapping> = {
-  Verb: { icon: Zap, color: 'text-accent', bgColor: 'bg-accent/15' },
-  Grammar: { icon: BookOpen, color: 'text-primary', bgColor: 'bg-primary/15' },
-  'Grammar Point': { icon: BookOpen, color: 'text-primary', bgColor: 'bg-primary/15' },
-  Modifier: { icon: Star, color: 'text-secondary', bgColor: 'bg-secondary/15' },
-  Particle: { icon: Hash, color: 'text-success', bgColor: 'bg-success/15' },
-  Greetings: { icon: MessageCircle, color: 'text-accent', bgColor: 'bg-accent/15' },
-  Food: { icon: Heart, color: 'text-destructive', bgColor: 'bg-destructive/15' },
-  Travel: { icon: Compass, color: 'text-secondary', bgColor: 'bg-secondary/15' },
-  Numbers: { icon: Hash, color: 'text-success', bgColor: 'bg-success/15' },
-  'Daily Life': { icon: Clock, color: 'text-primary', bgColor: 'bg-primary/15' },
-};
-
-const DEFAULT_ICON_MAPPING: IconMapping = {
-  icon: Star,
-  color: 'text-muted-foreground',
-  bgColor: 'bg-muted',
-};
-
-export function getIconForWord(category?: string): IconMapping {
-  if (!category) return DEFAULT_ICON_MAPPING;
-  return CATEGORY_ICON_MAP[category] ?? DEFAULT_ICON_MAPPING;
 }
 
 // ── Distractors ──
