@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Loader2, CheckCircle2, User, Lock } from 'lucide-react';
+import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const isProduction = window.location.hostname === 'hanguk-eo-bloom.lovable.app';
@@ -122,7 +122,7 @@ export default function Auth() {
               <>
                 {!isProduction && (
                   <p className="text-xs text-muted-foreground text-center mb-4 bg-muted/50 rounded px-2 py-1">
-                    🛠 Dev mode — using email/password
+                    <span className="inline-flex items-center gap-1"><Wrench className="h-3.5 w-3.5" /> Dev mode — using email/password</span>
                   </p>
                 )}
 
@@ -202,11 +202,11 @@ export default function Auth() {
                     {sending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : isSignUp ? (
-                      'Create Account ✨'
+                      <span className="inline-flex items-center gap-1.5">Create Account <Sparkles className="h-4 w-4" /></span>
                     ) : isProduction ? (
-                      'Send Magic Link ✨'
+                      <span className="inline-flex items-center gap-1.5">Send Magic Link <Sparkles className="h-4 w-4" /></span>
                     ) : (
-                      'Sign In ✨'
+                      <span className="inline-flex items-center gap-1.5">Sign In <Sparkles className="h-4 w-4" /></span>
                     )}
                   </Button>
                 </form>

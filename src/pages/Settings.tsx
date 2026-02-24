@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, Upload, ChevronRight } from 'lucide-react';
+import { LogOut, BarChart3, Upload, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CsvImport from '@/pages/CsvImport';
 
@@ -18,7 +18,7 @@ export default function Settings() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-display font-bold">⚙️ Settings</h1>
+      <h1 className="text-2xl font-display font-bold flex items-center gap-2"><SettingsIcon className="h-6 w-6 text-primary" /> Settings</h1>
 
       <div className="soft-card p-5 flex items-center gap-4">
         <Avatar className="h-14 w-14">

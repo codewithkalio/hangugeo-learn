@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles, Volume2 } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles, Volume2, Zap, Trophy, ThumbsUp, Dumbbell, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -121,7 +121,7 @@ export default function FlashcardDrill() {
           <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-display font-bold">⚡ Drill Setup</h1>
+          <h1 className="text-xl font-display font-bold flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Drill Setup</h1>
         </div>
 
         <div className="soft-card p-5 space-y-5">
@@ -198,7 +198,7 @@ export default function FlashcardDrill() {
             disabled={deckSize === 0}
             className="w-full soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold disabled:opacity-50"
           >
-            Start Drill ⚡
+            <span className="flex items-center gap-2">Start Drill <Zap className="h-4 w-4" /></span>
           </motion.button>
         </div>
       </div>
@@ -222,7 +222,11 @@ export default function FlashcardDrill() {
     return (
       <div className="space-y-6 max-w-md mx-auto">
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center space-y-4">
-          <p className="text-5xl">{Number(avgConfidence) >= 3 ? '🎉' : Number(avgConfidence) >= 2 ? '👍' : '💪'}</p>
+          {Number(avgConfidence) >= 3
+            ? <Trophy className="h-12 w-12 text-primary mx-auto" />
+            : Number(avgConfidence) >= 2
+            ? <ThumbsUp className="h-12 w-12 text-primary mx-auto" />
+            : <Dumbbell className="h-12 w-12 text-primary mx-auto" />}
           <h1 className="text-2xl font-display font-bold">Session Complete!</h1>
 
           {/* Confidence Distribution */}
@@ -246,7 +250,7 @@ export default function FlashcardDrill() {
           {/* Review Section */}
           {reviewCards.length > 0 && (
             <div className="soft-card p-4 text-left space-y-2">
-              <p className="font-display font-bold text-sm">📖 Review these:</p>
+              <p className="font-display font-bold text-sm flex items-center gap-1.5"><Layers className="h-4 w-4 text-primary" /> Review these:</p>
               {reviewCards.map(card => (
                 <div key={card.id} className="flex justify-between text-sm">
                   <span className="font-medium">{card.korean}</span>

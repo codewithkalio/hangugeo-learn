@@ -1,6 +1,6 @@
 import { useApp } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
-import { BookOpen, Zap, Target, TrendingUp } from 'lucide-react';
+import { Layers, Zap, Target, TrendingUp, Hand } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { hasWeakWords } from '@/lib/boostHelpers';
 
@@ -27,8 +27,8 @@ export default function Dashboard() {
       <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-              안녕하세요! 👋
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground flex items-center gap-2">
+              안녕하세요! <Hand className="h-7 w-7 text-primary" />
             </h1>
             <p className="text-muted-foreground mt-1">Ready for today's practice?</p>
           </div>
@@ -42,7 +42,7 @@ export default function Dashboard() {
           <span className="font-display font-bold text-sm">Start Drill</span>
         </Link>
         <Link to="/cards" className="soft-btn bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
-          <BookOpen className="h-6 w-6" />
+          <Layers className="h-6 w-6" />
           <span className="font-display font-bold text-sm">Add Flashcard</span>
         </Link>
       </motion.div>
@@ -51,7 +51,7 @@ export default function Dashboard() {
       {hasWeak && (
         <motion.div initial="hidden" animate="visible" custom={1.5} variants={fadeUp}>
           <Link to="/boost" className="soft-btn bg-secondary text-secondary-foreground p-4 rounded-2xl flex items-center gap-3 w-full">
-            <span className="text-xl">⚡</span>
+            <Zap className="h-5 w-5" />
             <div className="text-left">
               <span className="font-display font-bold text-sm block">Word Boost</span>
               <span className="text-xs opacity-70">Reinforce your weak words</span>
@@ -74,7 +74,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
         </div>
         <div className="soft-card p-4 text-center">
-          <BookOpen className="h-5 w-5 mx-auto text-accent mb-1" />
+          <Layers className="h-5 w-5 mx-auto text-accent mb-1" />
           <p className="text-xl font-display font-bold text-foreground">{dueCards}</p>
           <p className="text-[10px] text-muted-foreground font-medium">Due for Review</p>
         </div>

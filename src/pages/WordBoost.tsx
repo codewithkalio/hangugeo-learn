@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Zap, PartyPopper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
@@ -53,7 +53,7 @@ export default function WordBoost() {
   if (weakWords.length === 0) {
     return (
       <div className="max-w-md mx-auto text-center space-y-4 py-12">
-        <p className="text-4xl">🎉</p>
+        <PartyPopper className="h-10 w-10 text-primary mx-auto" />
         <h1 className="text-xl font-display font-bold">No weak words!</h1>
         <p className="text-sm text-muted-foreground">You're doing great. Keep drilling to maintain your streak.</p>
         <button onClick={() => navigate('/')} className="soft-btn bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-display font-bold">
@@ -70,7 +70,7 @@ export default function WordBoost() {
           <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-display font-bold">⚡ Word Boost</h1>
+          <h1 className="text-lg font-display font-bold flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Word Boost</h1>
         </div>
       )}
 

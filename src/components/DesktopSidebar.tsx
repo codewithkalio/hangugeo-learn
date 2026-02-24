@@ -1,14 +1,13 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Zap, BarChart3, Settings, LogOut } from 'lucide-react';
+import { Home, Layers, Zap, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const links = [
-  { to: '/', icon: Home, label: 'Home', emoji: '🏠' },
-  { to: '/cards', icon: BookOpen, label: 'Flashcards', emoji: '📚' },
-  { to: '/drill', icon: Zap, label: 'Drill', emoji: '⚡' },
-  { to: '/settings', icon: Settings, label: 'Settings', emoji: '⚙️' },
-  
+  { to: '/', icon: Home, label: 'Home' },
+  { to: '/cards', icon: Layers, label: 'Flashcards' },
+  { to: '/drill', icon: Zap, label: 'Drill' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 export function DesktopSidebar() {
@@ -26,7 +25,7 @@ export function DesktopSidebar() {
       </div>
 
       <nav className="flex flex-col gap-1">
-        {links.map(({ to, icon: Icon, label, emoji }) => {
+      {links.map(({ to, icon: Icon, label }) => {
           const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
           return (
             <NavLink
@@ -39,7 +38,7 @@ export function DesktopSidebar() {
                   : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
               )}
             >
-              <span className="text-base">{emoji}</span>
+              <Icon className="h-5 w-5" />
               <span>{label}</span>
             </NavLink>
           );

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Trophy, ThumbsUp, Dumbbell } from 'lucide-react';
 
 interface RoundResult {
   round: string;
@@ -19,7 +19,7 @@ export default function BoostSummary({ rounds }: Props) {
   const totalQuestions = rounds.reduce((s, r) => s + r.total, 0);
   const pct = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
-  const emoji = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '💪';
+  const ResultIcon = pct >= 80 ? Trophy : pct >= 50 ? ThumbsUp : Dumbbell;
   const message = pct >= 80 ? 'Amazing work!' : pct >= 50 ? 'Good effort!' : 'Keep practicing!';
 
   return (
@@ -28,7 +28,7 @@ export default function BoostSummary({ rounds }: Props) {
       animate={{ scale: 1, opacity: 1 }}
       className="space-y-6 text-center"
     >
-      <p className="text-5xl">{emoji}</p>
+      <ResultIcon className="h-12 w-12 text-primary mx-auto" />
       <h1 className="text-2xl font-display font-bold">{message}</h1>
 
       <div className="soft-card p-5 space-y-3">
