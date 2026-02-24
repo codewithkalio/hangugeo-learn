@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, PartyPopper } from 'lucide-react';
+import { ArrowLeft, Sparkles, PartyPopper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
@@ -70,7 +70,7 @@ export default function WordBoost() {
           <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-display font-bold flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Word Boost</h1>
+          <h1 className="text-lg font-display font-bold flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Word Boost</h1>
         </div>
       )}
 
