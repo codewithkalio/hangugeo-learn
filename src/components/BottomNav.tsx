@@ -1,11 +1,11 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Layers, Zap, Settings, LogOut } from 'lucide-react';
+import { Home, CopyPlus, Zap, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const tabs = [
   { to: '/', icon: Home, label: 'Home' },
-  { to: '/cards', icon: Layers, label: 'Cards' },
+  { to: '/cards', icon: CopyPlus, label: 'Cards' },
   { to: '/drill', icon: Zap, label: 'Drill' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
