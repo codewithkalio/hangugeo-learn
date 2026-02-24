@@ -1,6 +1,6 @@
 import { useApp } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
-import { CopyPlus, Copy, Zap, Target, TrendingUp } from 'lucide-react';
+import { CopyPlus, Copy, Zap, Sparkles, Target, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { hasWeakWords } from '@/lib/boostHelpers';
 
@@ -51,7 +51,7 @@ export default function Dashboard() {
       {hasWeak && (
         <motion.div initial="hidden" animate="visible" custom={1.5} variants={fadeUp}>
           <Link to="/boost" className="soft-btn bg-secondary text-secondary-foreground p-4 rounded-2xl flex items-center gap-3 w-full">
-            <Zap className="h-5 w-5" />
+            <Sparkles className="h-5 w-5" />
             <div className="text-left">
               <span className="font-display font-bold text-sm block">Word Boost</span>
               <span className="text-xs opacity-70">Reinforce your weak words</span>
