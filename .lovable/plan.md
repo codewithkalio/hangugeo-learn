@@ -1,29 +1,18 @@
 
 
-## Replace Flashcard Icons with CopyPlus and Restore Dashboard Emoji
+## Plan: Replace Word Boost Icon from `Zap` to `Sparkles`
 
-Two changes:
+Two files need changes. `Sparkles` is already imported in both `BoostSummary.tsx` and `FlashcardDrill.tsx`, so no new imports needed there.
 
-### 1. Replace all `Layers` flashcard icons with `CopyPlus`
+### Changes
 
-Every place where `Layers` is used to represent flashcards gets swapped to `CopyPlus`.
+| File | What changes |
+|---|---|
+| **Dashboard.tsx** (line 3, 54) | Add `Sparkles` to import; replace `<Zap>` with `<Sparkles>` on the Word Boost link |
+| **WordBoost.tsx** (line 3, 73) | Replace `Zap` with `Sparkles` in import; replace `<Zap>` with `<Sparkles>` in the page heading |
 
-| File | Line(s) | Change |
-|---|---|---|
-| **DesktopSidebar.tsx** | 2, 8 | Import `CopyPlus` instead of `Layers`; use it for the Flashcards nav link |
-| **BottomNav.tsx** | 2, 8 | Import `CopyPlus` instead of `Layers`; use it for the Cards tab |
-| **FlashcardBank.tsx** | 4, 44 | Import `CopyPlus` instead of `Layers`; use in page heading |
-| **FlashcardDrill.tsx** | 4, 253 | Import `CopyPlus` instead of `Layers`; use in "Review these" label |
-| **Dashboard.tsx** | 3, 45, 77 | Import `CopyPlus` instead of `Layers`; use in "Add Flashcard" quick action and "Due for Review" stat card |
-
-### 2. Restore 👋 emoji on Dashboard heading
-
-| File | Line(s) | Change |
-|---|---|---|
-| **Dashboard.tsx** | 3, 31 | Remove `Hand` import; replace `<Hand className="h-7 w-7 text-primary" />` with the `👋` emoji |
-
-### Technical notes
-- `CopyPlus` is confirmed available in the installed `lucide-react` v0.462.0
-- No new dependencies needed
-- Sizing stays consistent: `h-5 w-5` for sidebar/headings, `h-4 w-4` for inline, `h-6 w-6` for dashboard action cards
+### No changes needed
+- **FlashcardDrill.tsx** — already uses `Sparkles` for the "Boost Weak Words" button
+- **BoostSummary.tsx** — already uses `Sparkles` for the accuracy display
+- **Start Drill** button on Dashboard keeps `Zap`
 
