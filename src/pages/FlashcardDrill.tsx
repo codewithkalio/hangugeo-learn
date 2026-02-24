@@ -198,7 +198,7 @@ export default function FlashcardDrill() {
             disabled={deckSize === 0}
             className="w-full soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold disabled:opacity-50"
           >
-            <span className="flex items-center gap-2">Start Drill <Zap className="h-4 w-4" /></span>
+            <span className="flex items-center justify-center gap-2">Start Drill <Zap className="h-4 w-4" /></span>
           </motion.button>
         </div>
       </div>
