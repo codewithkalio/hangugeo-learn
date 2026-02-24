@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles, Volume2, Zap, Trophy, ThumbsUp, Dumbbell, CopyPlus } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Brain, FolderOpen, Sparkles, Volume2, Zap, Trophy, ThumbsUp, Dumbbell, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -250,7 +250,7 @@ export default function FlashcardDrill() {
           {/* Review Section */}
           {reviewCards.length > 0 && (
             <div className="soft-card p-4 text-left space-y-2">
-              <p className="font-display font-bold text-sm flex items-center gap-1.5"><CopyPlus className="h-4 w-4 text-primary" /> Review these:</p>
+              <p className="font-display font-bold text-sm flex items-center gap-1.5"><Copy className="h-4 w-4 text-primary" /> Review these:</p>
               {reviewCards.map(card => (
                 <div key={card.id} className="flex justify-between text-sm">
                   <span className="font-medium">{card.korean}</span>

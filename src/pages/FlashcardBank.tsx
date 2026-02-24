@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Plus, Trash2, Edit2, Filter, X, CopyPlus, Inbox, SearchX } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Filter, X, Copy, Inbox, SearchX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -41,7 +41,7 @@ export default function FlashcardBank() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><CopyPlus className="h-6 w-6 text-primary" /> Flashcards</h1>
+        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><Copy className="h-6 w-6 text-primary" /> Flashcards</h1>
         <span className="text-sm text-muted-foreground">{data.flashcards.length} cards</span>
       </div>
 

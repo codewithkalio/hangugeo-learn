@@ -1,6 +1,6 @@
 import { useApp } from '@/contexts/AppContext';
 import { Link } from 'react-router-dom';
-import { CopyPlus, Zap, Target, TrendingUp } from 'lucide-react';
+import { CopyPlus, Copy, Zap, Target, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { hasWeakWords } from '@/lib/boostHelpers';
 
@@ -74,7 +74,7 @@ export default function Dashboard() {
           <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
         </div>
         <div className="soft-card p-4 text-center">
-          <CopyPlus className="h-5 w-5 mx-auto text-accent mb-1" />
+          <Copy className="h-5 w-5 mx-auto text-accent mb-1" />
           <p className="text-xl font-display font-bold text-foreground">{dueCards}</p>
           <p className="text-[10px] text-muted-foreground font-medium">Due for Review</p>
         </div>
