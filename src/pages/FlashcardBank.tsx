@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Plus, Trash2, Edit2, Filter, X } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Filter, X, Layers, Inbox, SearchX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -41,7 +41,7 @@ export default function FlashcardBank() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-bold">📚 Flashcards</h1>
+        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><Layers className="h-6 w-6 text-primary" /> Flashcards</h1>
         <span className="text-sm text-muted-foreground">{data.flashcards.length} cards</span>
       </div>
 
@@ -93,7 +93,7 @@ export default function FlashcardBank() {
       {/* Card List */}
       {filtered.length === 0 && data.flashcards.length === 0 ? (
         <div className="soft-card p-8 text-center">
-          <p className="text-4xl mb-3">📭</p>
+          <Inbox className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground font-medium">No flashcards yet</p>
           <Link
             to="/cards/new"
@@ -104,7 +104,7 @@ export default function FlashcardBank() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="soft-card p-8 text-center">
-          <p className="text-4xl mb-3">🔍</p>
+          <SearchX className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground font-medium">No matches found</p>
           {search && (
             <Link
