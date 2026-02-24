@@ -1,34 +1,29 @@
 
 
-## Updated Plan: Replace Emojis with Lucide Icons
+## Replace Flashcard Icons with CopyPlus and Restore Dashboard Emoji
 
-Same plan as before with one change: **use `Layers` instead of `BookOpen`** for flashcard-related icons.
+Two changes:
 
-### Updated mapping
+### 1. Replace all `Layers` flashcard icons with `CopyPlus`
 
-| File | Emoji removed | Lucide replacement |
+Every place where `Layers` is used to represent flashcards gets swapped to `CopyPlus`.
+
+| File | Line(s) | Change |
 |---|---|---|
-| **DesktopSidebar.tsx** | `🏠` `📚` `⚡` `⚙️` | Use existing `icon` property — but change `BookOpen` to `Layers` in the `links` array |
-| **FlashcardBank.tsx** | `📚` in heading | `Layers` icon |
-| | `📭` empty state | `Inbox` icon |
-| | `🔍` no-match state | `SearchX` icon |
-| **FlashcardDrill.tsx** | `📖` "Review these" label | `Layers` icon |
-| **Dashboard.tsx** | `👋` in heading | `Hand` icon |
-| | `⚡` in Word Boost link | `Zap` icon |
-| **FlashcardDrill.tsx** | `⚡` heading / button | `Zap` icon |
-| | `🎉`/`👍`/`💪` summary | `Trophy`/`ThumbsUp`/`Dumbbell` |
-| **WordBoost.tsx** | `⚡` heading | `Zap` icon |
-| | `🎉` no weak words | `PartyPopper` icon |
-| **Settings.tsx** | `⚙️` heading | `Settings` icon |
-| **Auth.tsx** | `✨` buttons | `Sparkles` icon |
-| | `🛠` dev label | `Wrench` icon |
-| **BoostSummary.tsx** | `🌟`/`👍`/`💪` | `Trophy`/`ThumbsUp`/`Dumbbell` |
+| **DesktopSidebar.tsx** | 2, 8 | Import `CopyPlus` instead of `Layers`; use it for the Flashcards nav link |
+| **BottomNav.tsx** | 2, 8 | Import `CopyPlus` instead of `Layers`; use it for the Cards tab |
+| **FlashcardBank.tsx** | 4, 44 | Import `CopyPlus` instead of `Layers`; use in page heading |
+| **FlashcardDrill.tsx** | 4, 253 | Import `CopyPlus` instead of `Layers`; use in "Review these" label |
+| **Dashboard.tsx** | 3, 45, 77 | Import `CopyPlus` instead of `Layers`; use in "Add Flashcard" quick action and "Due for Review" stat card |
 
-### Kept as-is
-- 🇰🇷 and 🇺🇸 flag emojis remain unchanged everywhere
+### 2. Restore 👋 emoji on Dashboard heading
+
+| File | Line(s) | Change |
+|---|---|---|
+| **Dashboard.tsx** | 3, 31 | Remove `Hand` import; replace `<Hand className="h-7 w-7 text-primary" />` with the `👋` emoji |
 
 ### Technical notes
-- `Layers` is available in `lucide-react` — no new dependencies
-- In `DesktopSidebar.tsx`, the `links` array already has an `icon` field; change `BookOpen` import to `Layers` and update the entry, then render `<Icon className="h-5 w-5" />` instead of `<span>{emoji}</span>`
-- Sizing: `h-5 w-5` for headings, `h-4 w-4` for inline/button contexts
+- `CopyPlus` is confirmed available in the installed `lucide-react` v0.462.0
+- No new dependencies needed
+- Sizing stays consistent: `h-5 w-5` for sidebar/headings, `h-4 w-4` for inline, `h-6 w-6` for dashboard action cards
 
