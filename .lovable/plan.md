@@ -1,18 +1,19 @@
 
 
-## Plan: Replace Word Boost Icon from `Zap` to `Sparkles`
+## Plan: Apply Sunflower Yellow (#F0B429) to Zap and Sparkles Icons
 
-Two files need changes. `Sparkles` is already imported in both `BoostSummary.tsx` and `FlashcardDrill.tsx`, so no new imports needed there.
+Apply `text-[#F0B429]` to every `<Zap>` and `<Sparkles>` icon across three files.
 
 ### Changes
 
-| File | What changes |
-|---|---|
-| **Dashboard.tsx** (line 3, 54) | Add `Sparkles` to import; replace `<Zap>` with `<Sparkles>` on the Word Boost link |
-| **WordBoost.tsx** (line 3, 73) | Replace `Zap` with `Sparkles` in import; replace `<Zap>` with `<Sparkles>` in the page heading |
+| File | Line | Current | New class |
+|---|---|---|---|
+| **Dashboard.tsx** | 41 | `<Zap className="h-6 w-6" />` | `<Zap className="h-6 w-6 text-[#F0B429]" />` |
+| **Dashboard.tsx** | 54 | `<Sparkles className="h-5 w-5" />` | `<Sparkles className="h-5 w-5 text-[#F0B429]" />` |
+| **FlashcardDrill.tsx** | 124 | `<Zap className="h-5 w-5 text-primary" />` | `<Zap className="h-5 w-5 text-[#F0B429]" />` |
+| **FlashcardDrill.tsx** | 201 | `<Zap className="h-4 w-4" />` | `<Zap className="h-4 w-4 text-[#F0B429]" />` |
+| **FlashcardDrill.tsx** | 269 | `<Sparkles className="h-4 w-4" />` | `<Sparkles className="h-4 w-4 text-[#F0B429]" />` |
+| **WordBoost.tsx** | 73 | `<Sparkles className="h-5 w-5 text-primary" />` | `<Sparkles className="h-5 w-5 text-[#F0B429]" />` |
 
-### No changes needed
-- **FlashcardDrill.tsx** — already uses `Sparkles` for the "Boost Weak Words" button
-- **BoostSummary.tsx** — already uses `Sparkles` for the accuracy display
-- **Start Drill** button on Dashboard keeps `Zap`
+Six total icon color changes across three files. No structural or import changes needed.
 
