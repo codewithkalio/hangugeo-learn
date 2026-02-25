@@ -121,7 +121,7 @@ export default function FlashcardDrill() {
           <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-display font-bold flex items-center gap-2"><Zap className="h-5 w-5 text-primary" /> Drill Setup</h1>
+          <h1 className="text-xl font-display font-bold flex items-center gap-2"><h1 className="text-xl font-display font-bold flex items-center gap-2"><Zap className="h-5 w-5 text-[#F0B429]" /> Drill Setup</h1> Drill Setup</h1>
         </div>
 
         <div className="soft-card p-5 space-y-5">
@@ -198,7 +198,7 @@ export default function FlashcardDrill() {
             disabled={deckSize === 0}
             className="w-full soft-btn bg-primary text-primary-foreground py-3 rounded-2xl font-display font-bold disabled:opacity-50"
           >
-            <span className="flex items-center justify-center gap-2">Start Drill <Zap className="h-4 w-4" /></span>
+            <span className="flex items-center justify-center gap-2">Start Drill <span className="flex items-center justify-center gap-2">Start Drill <Zap className="h-4 w-4 text-[#F0B429]" /></span></span>
           </motion.button>
         </div>
       </div>
@@ -266,7 +266,7 @@ export default function FlashcardDrill() {
                 onClick={() => navigate('/boost', { state: { sessionResults: results } })}
                 className="w-full soft-btn bg-accent text-accent-foreground py-3 rounded-2xl font-display font-bold text-sm flex items-center justify-center gap-2"
               >
-                <Sparkles className="h-4 w-4" /> Boost Weak Words
+                <Sparkles className="h-4 w-4 text-[#F0B429]" /> Boost Weak Words Boost Weak Words
               </button>
             )}
             <div className="flex gap-2">
