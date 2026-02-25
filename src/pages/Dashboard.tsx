@@ -38,7 +38,7 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <motion.div initial="hidden" animate="visible" custom={1} variants={fadeUp} className="grid grid-cols-2 gap-3">
         <Link to="/drill" className="soft-btn bg-primary text-primary-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
-          <Zap className="h-6 w-6" />
+          <Zap className="h-6 w-6 text-[#F0B429]" />
           <span className="font-display font-bold text-sm">Start Drill</span>
         </Link>
         <Link to="/cards" className="soft-btn bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col items-center gap-2 text-center">
@@ -51,7 +51,7 @@ export default function Dashboard() {
       {hasWeak && (
         <motion.div initial="hidden" animate="visible" custom={1.5} variants={fadeUp}>
           <Link to="/boost" className="soft-btn bg-secondary text-secondary-foreground p-4 rounded-2xl flex items-center gap-3 w-full">
-            <Sparkles className="h-5 w-5" />
+            <Sparkles className="h-5 w-5 text-[#F0B429]" />
             <div className="text-left">
               <span className="font-display font-bold text-sm block">Word Boost</span>
               <span className="text-xs opacity-70">Reinforce your weak words</span>
