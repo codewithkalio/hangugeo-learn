@@ -134,11 +134,7 @@ A multi-round reinforcement module for weak words, accessible after a drill sess
 - **User identification** linked to Supabase auth user ID
 - **Global error forwarding** via `lib/errorCapture.ts` — captures unhandled errors and sends to PostHog
 
-### 13. Edge Functions
-
-- **`fetch-image`** — Supabase Edge Function that proxies Unsplash API requests (originally built for Picture Match round, now unused but retained)
-
-### 14. Security
+### 13. Security
 
 - **Row Level Security (RLS)** on all tables — users can only CRUD their own data
 - **CSV sanitization** guards against HTML injection and XSS in imported data
@@ -197,12 +193,11 @@ A multi-round reinforcement module for weak words, accessible after a drill sess
 - **What it was:** A fourth round in the Word Boost flow where users matched Korean words to Unsplash images
 - **How it worked:** The `fetch-image` edge function proxied requests to the Unsplash API, returning relevant photos for English translations. Users tapped the image that matched the spoken Korean word.
 - **Why it was reverted:** Image relevance was unreliable (e.g., searching "hello" returned generic photos), and the round added latency from API calls. The simpler **Match Pairs** text-based round replaced it with better reliability and instant load times.
-- **What remains:** Nothing — the `fetch-image` edge function and its source code have been fully removed from the project. The `UNSPLASH_ACCESS_KEY` secret may still be configured in Supabase.
 
 ### Verb Conjugation Practice
 
 - **What it was:** A conjugation drill where users transformed Korean sentences across 26 grammar patterns (Early/Intermediate/Advanced) by tapping morpheme tiles. Sessions were 5 questions each, with one retry per question and rule-specific explanations on failure.
 - **How it worked:** Users enabled grammar patterns in Settings. A quick-action card appeared on the Dashboard when patterns were enabled and sufficient verbs/nouns existed. The conjugation engine handled vowel harmony, consonant/vowel stems, and irregular verbs (ㄷ, ㅂ, ㅅ, ㅎ, 르, ㄹ). Pattern weighting reused the CBR algorithm. Vocabulary selection preferred high-confidence flashcards to keep cognitive load on conjugation rather than recall.
 - **What it included:** Two new database tables (`grammar_patterns`, `conjugation_results`), a conjugation engine with morpheme decomposition and distractor generation, a tile-based interaction UI, Settings integration, and Dashboard conditional visibility.
-- **Why it was reverted:** Reason not recorded.
-- **What remains:** Nothing — all code and database tables were removed.
+- **Why it was reverted:** The dynamic nature of this feature was its downfall.  Using the user's existing vocabulary to build sentences resulted in unintelligible sentences (ex: "I slept the book" or "You will drive the house").  The complexity of Korean verb conjugation would require many iterations to nail this approach.  
+- **What remains:** Nothing — all code and database tables were removed.  Reverted on Feb 21.
