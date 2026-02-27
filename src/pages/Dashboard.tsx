@@ -22,7 +22,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-4rem)]">
       {/* Greeting */}
       <motion.div initial="hidden" animate="visible" custom={0} variants={fadeUp}>
         <div className="flex items-center justify-between">
@@ -62,7 +62,7 @@ export default function Dashboard() {
 
 
       {/* Stats Cards */}
-      <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-3 gap-3">
+      <motion.div initial="hidden" animate="visible" custom={2} variants={fadeUp} className="grid grid-cols-3 gap-3 mt-auto">
         <div className="soft-card p-4 text-center">
           <Target className="h-5 w-5 mx-auto text-primary mb-1" />
           <p className="text-xl font-display font-bold text-foreground">{totalCards}</p>
