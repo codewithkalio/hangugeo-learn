@@ -19,7 +19,7 @@ export function DesktopSidebar() {
       <div className="flex items-center gap-3 px-3 py-4 mb-4">
         <span className="text-3xl">🇰🇷</span>
         <div>
-          <h1 className="text-lg font-display font-bold text-sidebar-foreground">HanGeul</h1>
+          <h1 className="text-lg font-display font-bold text-sidebar-foreground">한국어 Learn</h1>
           <p className="text-xs text-sidebar-foreground/60">Korean Learning</p>
         </div>
       </div>

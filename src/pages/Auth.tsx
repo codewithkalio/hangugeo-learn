@@ -93,7 +93,7 @@ export default function Auth() {
       >
         <div className="text-center mb-8">
           <span className="text-5xl">🇰🇷</span>
-          <h1 className="text-2xl font-display font-bold text-foreground mt-3">HanGeul</h1>
+          <h1 className="text-2xl font-display font-bold text-foreground mt-3">한국어 Learn</h1>
           <p className="text-sm text-muted-foreground mt-1">Korean Learning</p>
         </div>
 
