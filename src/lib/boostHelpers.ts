@@ -57,7 +57,7 @@ export function pickBoostWords(
     .filter(c => c.confidenceScore <= 2 && !sessionWeakIds.has(c.id))
     .sort((a, b) => b.weight - a.weight);
 
-  const weakPool = [...sessionWeak, ...bankWeak].slice(0, isDemo ? 2 : 5);
+  const weakPool = [...sessionWeak, ...bankWeak].slice(0, isDemo ? 3 : 5);
   const weakIds = new Set(weakPool.map(c => c.id));
 
   const anchorPool = allCards
