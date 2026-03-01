@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Copy, Zap, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demoHelpers';
 
 const links = [
   { to: '/', icon: Home, label: 'Home' },
@@ -13,6 +14,7 @@ const links = [
 export function DesktopSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const isDemo = isDemoUser(user);
 
   return (
     <aside className="hidden md:flex flex-col w-64 min-h-screen bg-sidebar text-sidebar-foreground p-4 gap-2">
@@ -52,10 +54,16 @@ export function DesktopSidebar() {
         {user && (
           <div className="flex items-center gap-2 px-1">
             <div className="flex-1 min-w-0">
-              {user.user_metadata?.full_name && (
-                <p className="text-sm font-medium text-sidebar-foreground truncate">{user.user_metadata.full_name}</p>
+              {isDemo ? (
+                <p className="text-sm font-medium text-sidebar-foreground">Demo Mode</p>
+              ) : (
+                <>
+                  {user.user_metadata?.full_name && (
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user.user_metadata.full_name}</p>
+                  )}
+                  <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
+                </>
               )}
-              <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
             </div>
             <button
               onClick={signOut}

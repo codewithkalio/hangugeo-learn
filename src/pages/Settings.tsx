@@ -18,6 +18,7 @@ export default function Settings() {
   const initials = name
     ? name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
     : email.slice(0, 2).toUpperCase();
+  const displayInitials = isDemo ? 'DM' : initials;
 
   return (
     <div className="space-y-6">
@@ -26,7 +27,7 @@ export default function Settings() {
       <div className="soft-card p-5 flex items-center gap-4">
         <Avatar className="h-14 w-14">
           <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
-            {initials}
+            {displayInitials}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
