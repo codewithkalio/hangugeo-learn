@@ -1,4 +1,4 @@
-# 🌸 Hanguk-eo Bloom — App Summary
+# 🌸 한국어 Learn — App Summary
 
 A Korean language flashcard learning app with spaced repetition, multi-round reinforcement drills, and a neumorphic SoftUI design system.
 

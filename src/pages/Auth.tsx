@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const isProduction = window.location.hostname === 'hanguk-eo-bloom.lovable.app';
+const isProduction = window.location.hostname === 'hangugeo-learn.lovable.app';
 
 export default function Auth() {
   const { user, loading } = useAuth();
