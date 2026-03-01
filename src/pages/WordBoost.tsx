@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, PartyPopper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { isDemoUser } from '@/lib/demoHelpers';
 import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
 import ListenChoose from '@/components/boost/ListenChoose';
 import MatchPairs from '@/components/boost/MatchPairs';
@@ -19,16 +21,19 @@ interface RoundResult {
 
 export default function WordBoost() {
   const { data } = useApp();
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isDemo = isDemoUser(user);
 
   const sessionResults = (location.state as any)?.sessionResults as
     | { cardId: string; confidence: number }[]
     | undefined;
 
   const { weakWords, allWords } = useMemo(
-    () => pickBoostWords(data.flashcards, sessionResults),
-    [data.flashcards, sessionResults],
+    () => pickBoostWords(data.flashcards, sessionResults, isDemo),
+    [data.flashcards, sessionResults, isDemo],
   );
 
   const hasAudio = isSpeechAvailable();

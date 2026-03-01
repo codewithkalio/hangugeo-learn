@@ -36,6 +36,7 @@ export interface BoostWordSet {
 export function pickBoostWords(
   allCards: Flashcard[],
   sessionResults?: { cardId: string; confidence: number }[],
+  isDemo = false,
 ): BoostWordSet {
   const sessionWeakIds = new Set<string>();
   const sessionWeak: Flashcard[] = [];
@@ -56,12 +57,14 @@ export function pickBoostWords(
     .filter(c => c.confidenceScore <= 2 && !sessionWeakIds.has(c.id))
     .sort((a, b) => b.weight - a.weight);
 
-  const weakPool = [...sessionWeak, ...bankWeak].slice(0, 5);
+  const weakPool = [...sessionWeak, ...bankWeak].slice(0, isDemo ? 2 : 5);
   const weakIds = new Set(weakPool.map(c => c.id));
 
   const anchorPool = allCards
     .filter(c => c.confidenceScore >= 3 && !weakIds.has(c.id));
-  const anchorWords = shuffleArray(anchorPool).slice(0, Math.min(3, Math.max(2, anchorPool.length)));
+  const anchorWords = isDemo
+    ? shuffleArray(anchorPool).slice(0, 1)
+    : shuffleArray(anchorPool).slice(0, Math.min(3, Math.max(2, anchorPool.length)));
 
   return {
     weakWords: weakPool,
