@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { seedDemoCards } from '@/lib/demoHelpers';
 
 const isProduction = window.location.hostname === 'hangugeo-learn.lovable.app';
+
+const captchaSiteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY as string | undefined;
 
 export default function Auth() {
   const { user, loading } = useAuth();
@@ -22,6 +25,13 @@ export default function Auth() {
   const [demoLoading, setDemoLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
+  const captchaRef = useRef<HCaptcha>(null);
+
+  const resetCaptcha = () => {
+    setCaptchaToken(undefined);
+    captchaRef.current?.resetCaptcha();
+  };
 
   if (loading) {
     return (
@@ -46,12 +56,14 @@ export default function Auth() {
         email,
         options: {
           emailRedirectTo: window.location.origin,
+          ...(captchaSiteKey && captchaToken ? { captchaToken } : {}),
           ...(isSignUp && name ? { data: { full_name: name } } : {}),
         },
       };
 
       const { error } = await supabase.auth.signInWithOtp(otpOptions);
       setSending(false);
+      if (captchaSiteKey) resetCaptcha();
       if (error) {
         setError(error.message);
       } else {
@@ -88,8 +100,11 @@ export default function Auth() {
     setError('');
     setDemoLoading(true);
     try {
-      const { data, error: anonErr } = await supabase.auth.signInAnonymously();
+      const { data, error: anonErr } = await supabase.auth.signInAnonymously({
+        options: captchaSiteKey && captchaToken ? { captchaToken } : undefined,
+      });
       if (anonErr) throw anonErr;
+      if (captchaSiteKey) resetCaptcha();
       if (data.user) {
         await seedDemoCards(data.user.id);
       }
@@ -97,10 +112,19 @@ export default function Auth() {
     } catch (err: any) {
       setError(err.message ?? 'Failed to start demo');
       setDemoLoading(false);
+      if (captchaSiteKey) resetCaptcha();
     }
   };
 
-  const isDisabled = sending || demoLoading || !email || (isSignUp && !name) || (!isProduction && !password);
+  const captchaRequired = Boolean(captchaSiteKey);
+  const captchaOk = !captchaRequired || Boolean(captchaToken);
+  const isDisabled =
+    sending ||
+    demoLoading ||
+    !email ||
+    (isSignUp && !name) ||
+    (!isProduction && !password) ||
+    !captchaOk;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
@@ -132,7 +156,14 @@ export default function Auth() {
                 <Button
                   variant="ghost"
                   className="mt-4 text-sm"
-                  onClick={() => { setSent(false); setName(''); setEmail(''); setPassword(''); setIsSignUp(false); }}
+                  onClick={() => {
+                    setSent(false);
+                    setName('');
+                    setEmail('');
+                    setPassword('');
+                    setIsSignUp(false);
+                    if (captchaSiteKey) resetCaptcha();
+                  }}
                 >
                   Use a different email
                 </Button>
@@ -213,6 +244,16 @@ export default function Auth() {
                     </div>
                   )}
 
+                  {captchaSiteKey && (
+                    <div className="flex justify-center">
+                      <HCaptcha
+                        ref={captchaRef}
+                        sitekey={captchaSiteKey}
+                        onVerify={(token) => setCaptchaToken(token)}
+                      />
+                    </div>
+                  )}
+
                   {error && (
                     <p className="text-sm text-destructive">{error}</p>
                   )}
@@ -260,7 +301,7 @@ export default function Auth() {
                   variant="outline"
                   className="w-full border-[#D05657]/40 hover:bg-[#D05657]/10 hover:border-[#D05657]/50 text-foreground"
                   onClick={handleTryDemo}
-                  disabled={demoLoading || sending}
+                  disabled={demoLoading || sending || !captchaOk}
                 >
                   {demoLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

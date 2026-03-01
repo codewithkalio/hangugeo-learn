@@ -32,9 +32,13 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Copy environment variables (see .env.example) and add your Supabase keys.
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
+
+**Optional: hCaptcha.** To protect Magic Link and Demo sign-in with hCaptcha, set `VITE_HCAPTCHA_SITE_KEY` in your `.env` (use the public site key from [hCaptcha](https://www.hcaptcha.com/); the secret key goes in Supabase Dashboard → Auth → Bot and Abuse Protection). If unset, auth works without captcha.
 
 **Edit a file directly in GitHub**
 
