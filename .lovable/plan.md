@@ -1,34 +1,25 @@
 
 
-## Demo Mode — Implementation Plan
+## Demo Mode: Shorter Word Boost Rounds
 
-### Overview
-Add a "Try Demo" button on the Auth page that instantly logs visitors in via Supabase anonymous auth, seeds 50 Korean vocabulary flashcards, and shows a persistent banner with Reset and Sign Up actions.
+### What changes
+
+Pass the demo-mode flag into `pickBoostWords` and into each round component so that demo users get 2 cards per round instead of 5.
 
 ### Steps
 
-1. **Enable anonymous sign-ins** — Manual step in Supabase Dashboard: Authentication → Settings → toggle on "Allow anonymous sign-ins"
+1. **`pickBoostWords` in `src/lib/boostHelpers.ts`** — Add an optional `isDemo` parameter. When true, slice `weakPool` to 2 (instead of 5) and `anchorWords` to 1 (instead of 2-3).
 
-2. **Create demo seed data** (`src/lib/demoSeedData.ts`) — Static array of 50 Korean words across 7 categories (Greetings, Food, Travel, Numbers, Daily Life, Verbs, Modifiers) with Korean text, English translation, category, and a short note
+2. **`WordBoost.tsx`** — Import `useAuth` and `isDemoUser`. Pass `isDemo` flag to `pickBoostWords` so it returns a smaller word set.
 
-3. **Create demo helper utilities** (`src/lib/demoHelpers.ts`)
-   - `isDemoUser(user)` — checks `user.is_anonymous`
-   - `seedDemoCards(userId)` — bulk-inserts categories + 50 flashcards
-   - `resetDemo(userId)` — deletes all user data (flashcards, drill_results, categories), then re-seeds
+3. **`MatchPairs.tsx`** — The component already slices to 6 pairs via `words.slice(0, 6)`. With fewer `allWords` passed in (3 instead of 8), this naturally produces fewer tiles. No change needed.
 
-4. **Update Auth page** (`src/pages/Auth.tsx`) — Add a "Try Demo" button below the sign-in form that calls `signInAnonymously()`, seeds data, and redirects to `/`
+4. **`ListenChoose.tsx` and `TypeItOut.tsx`** — These iterate over the `words` prop directly, so they'll automatically show fewer cards when given fewer words. No change needed.
 
-5. **Create DemoBanner component** (`src/components/DemoBanner.tsx`) — Slim animated banner shown for anonymous users with:
-   - "Exploring demo mode" label
-   - Reset button (with AlertDialog confirmation)
-   - Sign Up CTA (navigates to `/auth`)
+### Summary of card counts
 
-6. **Update AppLayout** (`src/components/AppLayout.tsx`) — Render `<DemoBanner />` above main content when `isDemoUser` is true
-
-7. **Invalidate queries after seed/reset** — Call `queryClient.invalidateQueries` for flashcards, drillResults, and categories so the UI refreshes immediately
-
-### What stays unchanged
-- Database schema (no migrations needed)
-- RLS policies (anonymous users get `authenticated` role with a real `auth.uid()`)
-- API hardening (anonymous auth uses `authenticated` role, not the revoked `anon` Postgres role)
+| Mode | Weak words | Anchors | Listen & Choose | Match Pairs | Type It Out |
+|------|-----------|---------|-----------------|-------------|-------------|
+| Normal | up to 5 | 2-3 | 5 cards | up to 6 pairs | 5 cards |
+| Demo | up to 2 | 1 | 2 cards | up to 3 pairs | 2 cards |
 
