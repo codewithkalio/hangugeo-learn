@@ -1,22 +1,25 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench } from 'lucide-react';
+import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { seedDemoCards } from '@/lib/demoHelpers';
 
 const isProduction = window.location.hostname === 'hangugeo-learn.lovable.app';
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sending, setSending] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
@@ -81,7 +84,23 @@ export default function Auth() {
     setError('');
   };
 
-  const isDisabled = sending || !email || (isSignUp && !name) || (!isProduction && !password);
+  const handleTryDemo = async () => {
+    setError('');
+    setDemoLoading(true);
+    try {
+      const { data, error: anonErr } = await supabase.auth.signInAnonymously();
+      if (anonErr) throw anonErr;
+      if (data.user) {
+        await seedDemoCards(data.user.id);
+      }
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to start demo');
+      setDemoLoading(false);
+    }
+  };
+
+  const isDisabled = sending || demoLoading || !email || (isSignUp && !name) || (!isProduction && !password);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
@@ -226,6 +245,32 @@ export default function Auth() {
                     </>
                   )}
                 </p>
+
+                <div className="relative my-5">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">or</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleTryDemo}
+                  disabled={demoLoading || sending}
+                >
+                  {demoLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Play className="h-4 w-4 text-accent" />
+                      Try Demo — No Sign Up Needed
+                    </span>
+                  )}
+                </Button>
               </>
             )}
           </CardContent>
