@@ -32,9 +32,11 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [duplicateMode, setDuplicateMode] = useState<'keep-original' | 'keep-csv'>('keep-original');
   const [importing, setImporting] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setFileName(file?.name ?? '');
     if (!file) return;
 
     const reader = new FileReader();
@@ -134,6 +136,7 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
 
       // Reset
       setParseResult(null);
+      setFileName('');
       if (fileRef.current) fileRef.current.value = '';
       onOpenChange(false);
     } catch (err: any) {
@@ -146,6 +149,7 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   const handleClose = (val: boolean) => {
     if (!val) {
       setParseResult(null);
+      setFileName('');
       if (fileRef.current) fileRef.current.value = '';
     }
     onOpenChange(val);
@@ -153,24 +157,38 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-[min(100vw-2rem,28rem)] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Import Flashcards from CSV</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="break-words min-w-0">
             Upload a CSV file with columns: Korean, English, Category, Note.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Upload className="h-5 w-5 text-muted-foreground" />
+        <div className="space-y-4 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 overflow-hidden">
+            <Upload className="h-5 w-5 shrink-0 text-muted-foreground" />
             <input
               ref={fileRef}
               type="file"
               accept=".csv"
               onChange={handleFileChange}
-              className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-primary/90"
+              className="sr-only"
+              id="csv-file-input"
             />
+            <Button
+              type="button"
+              variant="default"
+              onClick={() => fileRef.current?.click()}
+              className="shrink-0"
+            >
+              Choose File
+            </Button>
+            {fileName && (
+              <span className="truncate min-w-0 text-sm text-muted-foreground" title={fileName}>
+                {fileName}
+              </span>
+            )}
           </div>
 
           {parseResult && (
@@ -184,16 +202,16 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
               </div>
 
               {parseResult.duplicates.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">How should we handle duplicates?</p>
+                <div className="space-y-2 min-w-0">
+                  <p className="text-sm font-medium break-words">How should we handle duplicates?</p>
                   <RadioGroup value={duplicateMode} onValueChange={(v) => setDuplicateMode(v as any)}>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="keep-original" id="keep-original" />
-                      <Label htmlFor="keep-original" className="text-sm">Keep original (skip CSV duplicates)</Label>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <RadioGroupItem value="keep-original" id="keep-original" className="shrink-0" />
+                      <Label htmlFor="keep-original" className="text-sm break-words flex-1 min-w-0 cursor-pointer">Keep original (skip CSV duplicates)</Label>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <RadioGroupItem value="keep-csv" id="keep-csv" />
-                      <Label htmlFor="keep-csv" className="text-sm">Keep CSV version (overwrite category &amp; note)</Label>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <RadioGroupItem value="keep-csv" id="keep-csv" className="shrink-0" />
+                      <Label htmlFor="keep-csv" className="text-sm break-words flex-1 min-w-0 cursor-pointer">Keep CSV version (overwrite category &amp; note)</Label>
                     </div>
                   </RadioGroup>
                 </div>
