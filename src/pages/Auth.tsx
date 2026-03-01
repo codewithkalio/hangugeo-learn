@@ -202,11 +202,11 @@ export default function Auth() {
                     {sending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : isSignUp ? (
-                      <span className="inline-flex items-center gap-1.5">Create Account <Sparkles className="h-4 w-4" /></span>
+                      <span className="inline-flex items-center gap-1.5">Create Account <Sparkles className="h-4 w-4 text-[#F0B429]" /></span>
                     ) : isProduction ? (
-                      <span className="inline-flex items-center gap-1.5">Send Magic Link <Sparkles className="h-4 w-4" /></span>
+                      <span className="inline-flex items-center gap-1.5">Send Magic Link <Sparkles className="h-4 w-4 text-[#F0B429]" /></span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5">Sign In <Sparkles className="h-4 w-4" /></span>
+                      <span className="inline-flex items-center gap-1.5">Sign In <Sparkles className="h-4 w-4 text-[#F0B429]" /></span>
                     )}
                   </Button>
                 </form>
