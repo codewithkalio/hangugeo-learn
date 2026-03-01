@@ -70,7 +70,7 @@ export default function WordBoost() {
           <button onClick={() => navigate('/')} className="soft-btn p-2 rounded-xl">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-display font-bold flex items-center gap-2"><h1 className="text-lg font-display font-bold flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#F0B429]" /> Word Boost</h1> Word Boost</h1>
+          <h1 className="text-lg font-display font-bold flex items-center gap-2"><Sparkles className="h-5 w-5 text-[#F0B429]" /> Word Boost</h1>
         </div>
       )}
 

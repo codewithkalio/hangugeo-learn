@@ -26,7 +26,10 @@ export function DesktopSidebar() {
 
       <nav className="flex flex-col gap-1">
       {links.map(({ to, icon: Icon, label }) => {
-          const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+          const active =
+            location.pathname === to ||
+            (to !== '/' && location.pathname.startsWith(to)) ||
+            (to === '/drill' && location.pathname.startsWith('/boost'));
           return (
             <NavLink
               key={to}

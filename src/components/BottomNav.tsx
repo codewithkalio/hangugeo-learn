@@ -18,7 +18,10 @@ export function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
       <div className="mx-3 mb-3 flex items-center justify-around rounded-2xl bg-card py-2 px-1" style={{ boxShadow: 'var(--soft-shadow)' }}>
         {tabs.map(({ to, icon: Icon, label }) => {
-          const active = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
+          const active =
+            location.pathname === to ||
+            (to !== '/' && location.pathname.startsWith(to)) ||
+            (to === '/drill' && location.pathname.startsWith('/boost'));
           return (
             <NavLink
               key={to}
