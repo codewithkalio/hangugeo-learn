@@ -42,6 +42,12 @@ export default function WordBoost() {
   const [phase, setPhase] = useState<Phase>(initialPhase);
   const [roundResults, setRoundResults] = useState<RoundResult[]>([]);
 
+  const currentRoundNumber =
+    phase === 'listen-choose' ? 1
+    : phase === 'match-pairs' ? (hasAudio ? 2 : 1)
+    : phase === 'type-it' ? (hasAudio ? 3 : 2)
+    : 0;
+
   const advancePhase = (result: RoundResult) => {
     const updated = [...roundResults, result];
     setRoundResults(updated);
@@ -89,6 +95,7 @@ export default function WordBoost() {
         >
           {phase === 'listen-choose' && (
             <ListenChoose
+              roundNumber={currentRoundNumber}
               words={weakWords}
               allPool={allWords}
               onComplete={r => advancePhase({
@@ -101,6 +108,7 @@ export default function WordBoost() {
 
           {phase === 'match-pairs' && (
             <MatchPairs
+              roundNumber={currentRoundNumber}
               words={allWords}
               onComplete={(matched, total) => advancePhase({
                 round: 'Match Pairs',
@@ -112,6 +120,7 @@ export default function WordBoost() {
 
           {phase === 'type-it' && (
             <TypeItOut
+              roundNumber={currentRoundNumber}
               words={weakWords}
               onComplete={r => advancePhase({
                 round: 'Type It Out',

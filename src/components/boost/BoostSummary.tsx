@@ -33,7 +33,7 @@ export default function BoostSummary({ rounds }: Props) {
 
       <div className="soft-card p-5 space-y-3">
         <div className="flex items-center justify-center gap-2 text-primary">
-          <Sparkles className="h-5 w-5" />
+          <Sparkles className="h-5 w-5 text-[#F0B429]" />
           <p className="font-display font-bold text-lg">{pct}% Accuracy</p>
         </div>
 

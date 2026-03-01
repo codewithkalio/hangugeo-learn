@@ -4,6 +4,7 @@ import { Flashcard } from '@/lib/types';
 import { shuffleArray } from '@/lib/boostHelpers';
 
 interface Props {
+  roundNumber: number;
   words: Flashcard[];
   onComplete: (matchCount: number, totalPairs: number) => void;
 }
@@ -15,7 +16,7 @@ interface Tile {
   lang: 'kr' | 'en';
 }
 
-export default function MatchPairs({ words, onComplete }: Props) {
+export default function MatchPairs({ roundNumber, words, onComplete }: Props) {
   const pairs = useMemo(() => words.slice(0, 6), [words]);
 
   const tiles = useMemo<Tile[]>(() => {
@@ -69,7 +70,7 @@ export default function MatchPairs({ words, onComplete }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <p className="text-xs text-muted-foreground font-medium">Round 3 · Match Pairs</p>
+        <p className="text-xs text-muted-foreground font-medium">Round {roundNumber} · Match Pairs</p>
         <p className="text-sm text-muted-foreground">
           {matched.size / 2} / {pairs.length} matched
         </p>

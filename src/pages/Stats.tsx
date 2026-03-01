@@ -150,7 +150,7 @@ export default function Stats() {
 
       {cardsWithConfidence.length === 0 && data.drillResults.length === 0 && (
         <div className="soft-card p-8 text-center">
-          <p className="text-4xl mb-3">📈</p>
+          <ChartColumn className="h-12 w-12 text-[#F0B429] mx-auto mb-3" />
           <p className="text-muted-foreground">Complete some drills to see your stats!</p>
         </div>
       )}

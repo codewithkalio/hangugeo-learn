@@ -5,11 +5,12 @@ import { Flashcard } from '@/lib/types';
 import { speakKorean, isSpeechAvailable } from '@/lib/boostHelpers';
 
 interface Props {
+  roundNumber: number;
   words: Flashcard[];
   onComplete: (results: { cardId: string; correct: boolean }[]) => void;
 }
 
-export default function TypeItOut({ words, onComplete }: Props) {
+export default function TypeItOut({ roundNumber, words, onComplete }: Props) {
   const [idx, setIdx] = useState(0);
   const [input, setInput] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -53,7 +54,7 @@ export default function TypeItOut({ words, onComplete }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <p className="text-xs text-muted-foreground font-medium">Round 4 · Type It Out</p>
+        <p className="text-xs text-muted-foreground font-medium">Round {roundNumber} · Type It Out</p>
         <p className="text-sm text-muted-foreground">{idx + 1} / {words.length}</p>
       </div>
 

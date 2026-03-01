@@ -5,12 +5,13 @@ import { Flashcard } from '@/lib/types';
 import { speakKorean, shuffleArray, pickDistractors } from '@/lib/boostHelpers';
 
 interface Props {
+  roundNumber: number;
   words: Flashcard[];
   allPool: Flashcard[];
   onComplete: (results: { cardId: string; correct: boolean }[]) => void;
 }
 
-export default function ListenChoose({ words, allPool, onComplete }: Props) {
+export default function ListenChoose({ roundNumber, words, allPool, onComplete }: Props) {
   const [idx, setIdx] = useState(0);
   const [options, setOptions] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -52,7 +53,7 @@ export default function ListenChoose({ words, allPool, onComplete }: Props) {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <p className="text-xs text-muted-foreground font-medium">Round 1 · Listen & Choose</p>
+        <p className="text-xs text-muted-foreground font-medium">Round {roundNumber} · Listen & Choose</p>
         <p className="text-sm text-muted-foreground">{idx + 1} / {words.length}</p>
       </div>
 

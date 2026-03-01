@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Play } from 'lucide-react';
+import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Glasses } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { seedDemoCards } from '@/lib/demoHelpers';
 
@@ -258,7 +258,7 @@ export default function Auth() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
+                  className="w-full border-[#D05657]/40 hover:bg-[#D05657]/10 hover:border-[#D05657]/50 text-foreground"
                   onClick={handleTryDemo}
                   disabled={demoLoading || sending}
                 >
@@ -266,7 +266,7 @@ export default function Auth() {
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <span className="inline-flex items-center gap-1.5">
-                      <Play className="h-4 w-4 text-accent" />
+                      <Glasses className="h-4 w-4 text-[#D05657]" />
                       Try Demo — No Sign Up Needed
                     </span>
                   )}
