@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Pencil, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
@@ -72,15 +72,15 @@ export default function FlashcardForm() {
         <button onClick={() => navigate(-1)} className="soft-btn p-2 rounded-xl">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-xl font-display font-bold">
-          {isEdit ? '✏️ Edit Card' : '➕ New Card'}
+        <h1 className="text-xl font-display font-bold flex items-center gap-2">
+          {isEdit ? <><Pencil className="h-5 w-5" /> Edit Card</> : '➕ New Card'}
         </h1>
       </div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         {/* Korean Field */}
         <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">🇰🇷 Korean</Label>
+          <Label className="font-display font-bold text-sm">Korean</Label>
           <Input
             ref={koreanRef}
             value={korean}
@@ -92,7 +92,7 @@ export default function FlashcardForm() {
 
         {/* English Field */}
         <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">🇺🇸 English</Label>
+          <Label className="font-display font-bold text-sm">English</Label>
           <Input
             value={english}
             onChange={e => setEnglish(e.target.value)}
@@ -103,7 +103,7 @@ export default function FlashcardForm() {
 
         {/* Category */}
         <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">📁 Category (optional)</Label>
+          <Label className="font-display font-bold text-sm">Category (optional)</Label>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="soft-inset border-none bg-background">
               <SelectValue placeholder="Choose category..." />
@@ -128,7 +128,7 @@ export default function FlashcardForm() {
 
         {/* Note */}
         <div className="space-y-2">
-          <Label className="font-display font-bold text-sm">📝 Note (optional)</Label>
+          <Label className="font-display font-bold text-sm">Note (optional)</Label>
           <div className="relative">
             <Input
               value={note}
