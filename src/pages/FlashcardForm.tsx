@@ -73,7 +73,7 @@ export default function FlashcardForm() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-xl font-display font-bold flex items-center gap-2">
-          {isEdit ? <><Pencil className="h-5 w-5" /> Edit Card</> : '➕ New Card'}
+          {isEdit ? <><Pencil className="h-5 w-5 text-[#F0B429]" /> Edit Card</> : '➕ New Card'}
         </h1>
       </div>
 

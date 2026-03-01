@@ -1,7 +1,7 @@
 import { useApp } from '@/contexts/AppContext';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChartColumn } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function Stats() {
@@ -46,7 +46,7 @@ export default function Stats() {
         <Link to="/settings" className="soft-btn p-2 rounded-xl" aria-label="Back to Settings">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-2xl font-display font-bold">📊 Stats</h1>
+        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><ChartColumn className="h-6 w-6 text-[#F0B429]" /> Stats</h1>
       </div>
 
       {/* Overview */}

@@ -41,7 +41,7 @@ export default function FlashcardBank() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><Copy className="h-6 w-6 text-primary" /> Flashcards</h1>
+        <h1 className="text-2xl font-display font-bold flex items-center gap-2"><Copy className="h-6 w-6 text-[#F0B429]" /> Flashcards</h1>
         <span className="text-sm text-muted-foreground">{data.flashcards.length} cards</span>
       </div>
 

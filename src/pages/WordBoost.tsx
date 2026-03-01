@@ -53,7 +53,7 @@ export default function WordBoost() {
   if (weakWords.length === 0) {
     return (
       <div className="max-w-md mx-auto text-center space-y-4 py-12">
-        <PartyPopper className="h-10 w-10 text-primary mx-auto" />
+        <PartyPopper className="h-10 w-10 text-[#F0B429] mx-auto" />
         <h1 className="text-xl font-display font-bold">No weak words!</h1>
         <p className="text-sm text-muted-foreground">You're doing great. Keep drilling to maintain your streak.</p>
         <button onClick={() => navigate('/')} className="soft-btn bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-display font-bold">
