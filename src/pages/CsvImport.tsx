@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAppData } from '@/hooks/useAppData';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseCsv, csvRowSchema, SanitizedCsvRow } from '@/lib/csvSanitize';
+import { isDemoUser } from '@/lib/demoHelpers';
 import { Upload } from 'lucide-react';
 
 interface CsvImportProps {
@@ -33,6 +34,13 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   const [duplicateMode, setDuplicateMode] = useState<'keep-original' | 'keep-csv'>('keep-original');
   const [importing, setImporting] = useState(false);
   const [fileName, setFileName] = useState('');
+
+  useEffect(() => {
+    if (open && user && isDemoUser(user)) {
+      onOpenChange(false);
+      toast({ title: 'Import CSV is disabled in demo mode.', variant: 'destructive' });
+    }
+  }, [open, user, onOpenChange]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -87,6 +95,10 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
 
   const handleImport = async () => {
     if (!parseResult || !user) return;
+    if (isDemoUser(user)) {
+      toast({ title: 'Import CSV is disabled in demo mode.', variant: 'destructive' });
+      return;
+    }
     setImporting(true);
 
     try {

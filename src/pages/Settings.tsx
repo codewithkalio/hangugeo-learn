@@ -4,11 +4,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LogOut, BarChart3, Upload, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
+import { isDemoUser } from '@/lib/demoHelpers';
 import CsvImport from '@/pages/CsvImport';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
   const [csvOpen, setCsvOpen] = useState(false);
+  const isDemo = isDemoUser(user);
 
   const name = user?.user_metadata?.full_name || '';
   const email = user?.email || '';
@@ -41,7 +44,16 @@ export default function Settings() {
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </Link>
 
-      <button onClick={() => setCsvOpen(true)} className="soft-card p-4 flex items-center gap-3 hover:bg-accent/50 transition-colors w-full text-left">
+      <button
+        onClick={() => {
+          if (isDemo) {
+            toast({ title: 'Import CSV is disabled in demo mode', description: 'Sign up to import your own flashcards.' });
+            return;
+          }
+          setCsvOpen(true);
+        }}
+        className={`soft-card p-4 flex items-center gap-3 w-full text-left transition-colors ${isDemo ? 'opacity-60 cursor-not-allowed' : 'hover:bg-accent/50'}`}
+      >
         <Upload className="h-5 w-5 text-primary" />
         <span className="flex-1 font-medium text-sm">Import CSV</span>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
