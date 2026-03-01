@@ -1,22 +1,34 @@
 
 
-## Plan: Add Verb Conjugation to Reverted Features
+## Demo Mode — Implementation Plan
 
-Add a new entry under the **Reverted Features** section in `docs/APP_SUMMARY.md` (after the Picture Match entry at line 200), and update the Picture Match "What remains" line to reflect that the edge function has now been removed.
+### Overview
+Add a "Try Demo" button on the Auth page that instantly logs visitors in via Supabase anonymous auth, seeds 50 Korean vocabulary flashcards, and shows a persistent banner with Reset and Sign Up actions.
 
-### Changes to `docs/APP_SUMMARY.md`
+### Steps
 
-**1. Update Picture Match "What remains" (line 200)**
+1. **Enable anonymous sign-ins** — Manual step in Supabase Dashboard: Authentication → Settings → toggle on "Allow anonymous sign-ins"
 
-Replace the current text noting the edge function is "still deployed" with: the `fetch-image` edge function and its source code have been fully removed from the project.
+2. **Create demo seed data** (`src/lib/demoSeedData.ts`) — Static array of 50 Korean words across 7 categories (Greetings, Food, Travel, Numbers, Daily Life, Verbs, Modifiers) with Korean text, English translation, category, and a short note
 
-**2. Append new entry after line 200**
+3. **Create demo helper utilities** (`src/lib/demoHelpers.ts`)
+   - `isDemoUser(user)` — checks `user.is_anonymous`
+   - `seedDemoCards(userId)` — bulk-inserts categories + 50 flashcards
+   - `resetDemo(userId)` — deletes all user data (flashcards, drill_results, categories), then re-seeds
 
-Add a **Verb Conjugation Practice** subsection covering:
+4. **Update Auth page** (`src/pages/Auth.tsx`) — Add a "Try Demo" button below the sign-in form that calls `signInAnonymously()`, seeds data, and redirects to `/`
 
-- **What it was:** A conjugation drill where users transformed Korean sentences between 26 grammar patterns (Early/Intermediate/Advanced) by tapping morpheme tiles. Sessions were 5 questions each with one retry per question and rule-specific explanations on failure.
-- **How it worked:** Users enabled grammar patterns in Settings. A quick-action card appeared on the Dashboard when patterns were enabled and sufficient verbs/nouns existed. The conjugation engine handled vowel harmony, consonant/vowel stems, and irregular verbs. Pattern weighting reused the CBR algorithm. Vocabulary selection preferred high-confidence flashcards to keep cognitive load on conjugation.
-- **What it included:** Two new database tables (`grammar_patterns`, `conjugation_results`), a conjugation engine with morpheme decomposition and distractor generation, a tile-based interaction UI, Settings integration, and Dashboard conditional visibility.
-- **Why it was reverted:** (To be confirmed — the plan document does not state the reason. Will note it was reverted without specifying cause unless you provide one.)
-- **What remains:** Nothing — all code and database tables were removed.
+5. **Create DemoBanner component** (`src/components/DemoBanner.tsx`) — Slim animated banner shown for anonymous users with:
+   - "Exploring demo mode" label
+   - Reset button (with AlertDialog confirmation)
+   - Sign Up CTA (navigates to `/auth`)
+
+6. **Update AppLayout** (`src/components/AppLayout.tsx`) — Render `<DemoBanner />` above main content when `isDemoUser` is true
+
+7. **Invalidate queries after seed/reset** — Call `queryClient.invalidateQueries` for flashcards, drillResults, and categories so the UI refreshes immediately
+
+### What stays unchanged
+- Database schema (no migrations needed)
+- RLS policies (anonymous users get `authenticated` role with a real `auth.uid()`)
+- API hardening (anonymous auth uses `authenticated` role, not the revoked `anon` Postgres role)
 
