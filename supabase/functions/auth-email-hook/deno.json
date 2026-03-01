@@ -1,6 +1,0 @@
-{
-  "imports": {
-    "@lovable.dev/webhooks-js": "npm:@lovable.dev/webhooks-js@latest",
-    "@lovable.dev/email-js": "npm:@lovable.dev/email-js@latest"
-  }
-}
