@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+  <defs>
+    <style>
+      .bg-color { fill: #E1814C; }
+      .icon-stroke { 
+        fill: none; 
+        stroke: #FFFFFF; 
+        stroke-width: 1.8; 
+        stroke-linecap: round; 
+        stroke-linejoin: round; 
+      }
+      /* Fills the front card to mask the lines of the back card */
+      .front-card-fill { fill: #E1814C; }
+    </style>
+  </defs>
+
+  <rect class="bg-color" width="24" height="24" rx="5" />
+
+  <rect class="icon-stroke" x="4.5" y="3.5" width="11" height="13" rx="2" />
+
+  <rect class="icon-stroke front-card-fill" x="8.5" y="7.5" width="11" height="13" rx="2" />
+</svg>
