@@ -10,7 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Glasses } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const isProduction = window.location.hostname === 'hangugeo-learn.lovable.app';
+const productionHostname = import.meta.env.VITE_PRODUCTION_HOSTNAME as string | undefined;
+const isProduction = Boolean(productionHostname && window.location.hostname === productionHostname);
 
 const captchaSiteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY as string | undefined;
 
