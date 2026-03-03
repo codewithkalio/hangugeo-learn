@@ -3,8 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Sparkles, PartyPopper } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { isDemoUser } from '@/lib/demoHelpers';
+import { useDemoMode } from '@/contexts/DemoContext';
 import { pickBoostWords, isSpeechAvailable } from '@/lib/boostHelpers';
 import ListenChoose from '@/components/boost/ListenChoose';
 import MatchPairs from '@/components/boost/MatchPairs';
@@ -21,11 +20,11 @@ interface RoundResult {
 
 export default function WordBoost() {
   const { data } = useApp();
-  const { user } = useAuth();
+  const { isDemoMode } = useDemoMode();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isDemo = isDemoUser(user);
+  const isDemo = isDemoMode;
 
   const sessionResults = (location.state as any)?.sessionResults as
     | { cardId: string; confidence: number }[]

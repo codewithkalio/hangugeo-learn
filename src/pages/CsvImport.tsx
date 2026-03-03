@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAppData } from '@/hooks/useAppData';
+import { useApp } from '@/contexts/AppContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseCsv, csvRowSchema, SanitizedCsvRow } from '@/lib/csvSanitize';
-import { isDemoUser } from '@/lib/demoHelpers';
+import { useDemoMode } from '@/contexts/DemoContext';
 import { Upload } from 'lucide-react';
 
 interface CsvImportProps {
@@ -26,7 +26,8 @@ interface ParseResult {
 
 export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   const { user } = useAuth();
-  const { data, addCategory } = useAppData();
+  const { isDemoMode } = useDemoMode();
+  const { data, addCategory } = useApp();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -36,11 +37,11 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   const [fileName, setFileName] = useState('');
 
   useEffect(() => {
-    if (open && user && isDemoUser(user)) {
+    if (open && isDemoMode) {
       onOpenChange(false);
       toast({ title: 'Import CSV is disabled in demo mode.', variant: 'destructive' });
     }
-  }, [open, user, onOpenChange]);
+  }, [open, isDemoMode, onOpenChange]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,11 +95,12 @@ export default function CsvImport({ open, onOpenChange }: CsvImportProps) {
   };
 
   const handleImport = async () => {
-    if (!parseResult || !user) return;
-    if (isDemoUser(user)) {
+    if (!parseResult) return;
+    if (isDemoMode) {
       toast({ title: 'Import CSV is disabled in demo mode.', variant: 'destructive' });
       return;
     }
+    if (!user) return;
     setImporting(true);
 
     try {

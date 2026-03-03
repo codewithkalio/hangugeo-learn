@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
-import { isDemoUser, resetDemo } from '@/lib/demoHelpers';
-import { supabase } from '@/integrations/supabase/client';
+import { useDemoMode } from '@/contexts/DemoContext';
+import { resetDemoStorage } from '@/lib/demoStorage';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -19,29 +18,27 @@ import {
 import { RotateCcw, UserPlus, Loader2, Glasses } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const DEMO_QUERY_KEY = 'demo';
+
 export function DemoBanner() {
-  const { user } = useAuth();
+  const { isDemoMode, exitDemo } = useDemoMode();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [resetting, setResetting] = useState(false);
 
-  if (!isDemoUser(user)) return null;
+  if (!isDemoMode) return null;
 
-  const handleReset = async () => {
-    if (!user) return;
+  const handleReset = () => {
     setResetting(true);
-    try {
-      await resetDemo(user.id);
-      queryClient.invalidateQueries({ queryKey: ['flashcards', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['drillResults', user.id] });
-      queryClient.invalidateQueries({ queryKey: ['categories', user.id] });
-    } finally {
-      setResetting(false);
-    }
+    resetDemoStorage();
+    queryClient.invalidateQueries({ queryKey: ['flashcards', DEMO_QUERY_KEY] });
+    queryClient.invalidateQueries({ queryKey: ['drillResults', DEMO_QUERY_KEY] });
+    queryClient.invalidateQueries({ queryKey: ['categories', DEMO_QUERY_KEY] });
+    setResetting(false);
   };
 
-  const handleSignUp = async () => {
-    await supabase.auth.signOut();
+  const handleSignUp = () => {
+    exitDemo();
     navigate('/auth');
   };
 

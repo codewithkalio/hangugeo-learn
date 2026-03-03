@@ -1,7 +1,8 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Copy, Zap, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDemoMode } from '@/contexts/DemoContext';
 
 const tabs = [
   { to: '/', icon: Home, label: 'Home' },
@@ -12,7 +13,9 @@ const tabs = [
 
 export function BottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isDemoMode, exitDemo } = useDemoMode();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
@@ -39,7 +42,14 @@ export function BottomNav() {
           );
         })}
         <button
-          onClick={signOut}
+          onClick={async () => {
+            if (isDemoMode) {
+              exitDemo();
+              navigate('/auth');
+            } else {
+              await signOut();
+            }
+          }}
           className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <LogOut className="h-5 w-5" />

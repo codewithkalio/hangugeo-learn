@@ -3,12 +3,12 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDemoMode } from '@/contexts/DemoContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Glasses } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { seedDemoCards } from '@/lib/demoHelpers';
 
 const isProduction = window.location.hostname === 'hangugeo-learn.lovable.app';
 
@@ -16,13 +16,13 @@ const captchaSiteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY as string | undefi
 
 export default function Auth() {
   const { user, loading } = useAuth();
+  const { isDemoMode, setDemoMode } = useDemoMode();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sending, setSending] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
@@ -41,7 +41,7 @@ export default function Auth() {
     );
   }
 
-  if (user && !demoLoading) {
+  if (user || isDemoMode) {
     return <Navigate to="/" replace />;
   }
 
@@ -96,31 +96,16 @@ export default function Auth() {
     setError('');
   };
 
-  const handleTryDemo = async () => {
+  const handleTryDemo = () => {
     setError('');
-    setDemoLoading(true);
-    try {
-      const { data, error: anonErr } = await supabase.auth.signInAnonymously({
-        options: captchaSiteKey && captchaToken ? { captchaToken } : undefined,
-      });
-      if (anonErr) throw anonErr;
-      if (captchaSiteKey) resetCaptcha();
-      if (data.user) {
-        await seedDemoCards(data.user.id);
-      }
-      navigate('/');
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to start demo');
-      setDemoLoading(false);
-      if (captchaSiteKey) resetCaptcha();
-    }
+    setDemoMode(true);
+    navigate('/');
   };
 
   const captchaRequired = Boolean(captchaSiteKey);
   const captchaOk = !captchaRequired || Boolean(captchaToken);
   const isDisabled =
     sending ||
-    demoLoading ||
     !email ||
     (isSignUp && !name) ||
     (!isProduction && !password) ||
@@ -301,16 +286,12 @@ export default function Auth() {
                   variant="outline"
                   className="w-full border-[#D05657]/40 hover:bg-[#D05657]/10 hover:border-[#D05657]/50 text-foreground"
                   onClick={handleTryDemo}
-                  disabled={demoLoading || sending || !captchaOk}
+                  disabled={sending}
                 >
-                  {demoLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5">
-                      <Glasses className="h-4 w-4 text-[#D05657]" />
-                      Try Demo — No Sign Up Needed
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1.5">
+                    <Glasses className="h-4 w-4 text-[#D05657]" />
+                    Try Demo — No Sign Up Needed
+                  </span>
                 </Button>
               </>
             )}

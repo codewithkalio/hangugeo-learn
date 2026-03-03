@@ -1,9 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDemoMode } from '@/contexts/DemoContext';
 import { Loader2 } from 'lucide-react';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const { isDemoMode } = useDemoMode();
 
   if (loading) {
     return (
@@ -13,7 +15,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) {
+  if (!user && !isDemoMode) {
     return <Navigate to="/auth" replace />;
   }
 

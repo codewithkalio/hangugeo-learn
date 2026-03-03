@@ -1,8 +1,8 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Copy, Zap, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { isDemoUser } from '@/lib/demoHelpers';
+import { useDemoMode } from '@/contexts/DemoContext';
 
 const links = [
   { to: '/', icon: Home, label: 'Home' },
@@ -13,8 +13,10 @@ const links = [
 
 export function DesktopSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const isDemo = isDemoUser(user);
+  const { isDemoMode, exitDemo } = useDemoMode();
+  const isDemo = isDemoMode;
 
   return (
     <aside className="hidden md:flex flex-col w-64 min-h-screen bg-sidebar text-sidebar-foreground p-4 gap-2">
@@ -51,24 +53,31 @@ export function DesktopSidebar() {
       </nav>
 
       <div className="mt-auto px-3 py-4 space-y-3">
-        {user && (
+        {(user || isDemo) && (
           <div className="flex items-center gap-2 px-1">
             <div className="flex-1 min-w-0">
               {isDemo ? (
                 <p className="text-sm font-medium text-sidebar-foreground">Demo Mode</p>
-              ) : (
+              ) : user ? (
                 <>
                   {user.user_metadata?.full_name && (
                     <p className="text-sm font-medium text-sidebar-foreground truncate">{user.user_metadata.full_name}</p>
                   )}
                   <p className="text-xs text-sidebar-foreground/60 truncate">{user.email}</p>
                 </>
-              )}
+              ) : null}
             </div>
             <button
-              onClick={signOut}
+              onClick={async () => {
+                if (isDemo) {
+                  exitDemo();
+                  navigate('/auth');
+                } else {
+                  await signOut();
+                }
+              }}
               className="p-2 rounded-lg text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors"
-              title="Sign out"
+              title={isDemo ? 'Exit demo' : 'Sign out'}
             >
               <LogOut className="h-4 w-4" />
             </button>

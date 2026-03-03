@@ -1,17 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDemoMode } from '@/contexts/DemoContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { LogOut, BarChart3, Upload, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { isDemoUser } from '@/lib/demoHelpers';
 import CsvImport from '@/pages/CsvImport';
 
 export default function Settings() {
   const { user, signOut } = useAuth();
+  const { isDemoMode, exitDemo } = useDemoMode();
+  const navigate = useNavigate();
   const [csvOpen, setCsvOpen] = useState(false);
-  const isDemo = isDemoUser(user);
+  const isDemo = isDemoMode;
 
   const name = user?.user_metadata?.full_name || '';
   const email = user?.email || '';
@@ -34,7 +37,19 @@ export default function Settings() {
           {name && <p className="font-display font-bold text-base truncate">{name}</p>}
           <p className="text-sm text-muted-foreground truncate">{email}</p>
         </div>
-        <Button variant="ghost" size="icon" onClick={signOut} title="Sign out">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={async () => {
+            if (isDemo) {
+              exitDemo();
+              navigate('/auth');
+            } else {
+              await signOut();
+            }
+          }}
+          title={isDemo ? 'Exit demo' : 'Sign out'}
+        >
           <LogOut className="h-5 w-5" />
         </Button>
       </div>
