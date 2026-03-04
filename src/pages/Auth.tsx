@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,22 +25,10 @@ const productionHostnameRaw = import.meta.env.VITE_PRODUCTION_HOSTNAME as string
 const productionHostname = normalizeProductionHostname(productionHostnameRaw);
 const isProduction = Boolean(productionHostname && typeof window !== 'undefined' && window.location.hostname === productionHostname);
 
-// #region agent log
-function logAuthDevCheck() {
-  const currentHostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const data = { productionHostname: productionHostname ?? '(empty)', currentHostname, isProduction, envMode: import.meta.env.MODE };
-  console.log('[DEBUG dev-mode]', JSON.stringify(data));
-  fetch('http://127.0.0.1:7790/ingest/89ce4137-4a9b-46d6-8d1e-bef6f7f68c15',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'2fc0bb'},body:JSON.stringify({sessionId:'2fc0bb',location:'Auth.tsx:dev-mode-check',message:'Auth dev mode check',data,timestamp:Date.now(),hypothesisId:'H1'})}).catch(()=>{});
-}
-// #endregion
-
 const captchaSiteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY as string | undefined;
 
 export default function Auth() {
   const { user, loading } = useAuth();
-  // #region agent log
-  useEffect(() => { logAuthDevCheck(); }, []);
-  // #endregion
   const { isDemoMode, setDemoMode } = useDemoMode();
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
