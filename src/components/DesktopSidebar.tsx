@@ -19,7 +19,7 @@ export function DesktopSidebar() {
   const isDemo = isDemoMode;
 
   return (
-    <aside className="hidden md:flex flex-col w-64 min-h-screen bg-sidebar text-sidebar-foreground p-4 gap-2">
+    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 self-start bg-sidebar text-sidebar-foreground p-4 gap-2">
       <div className="flex items-center gap-3 px-3 py-4 mb-4">
         <span className="text-3xl">🇰🇷</span>
         <div>
