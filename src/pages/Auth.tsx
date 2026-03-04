@@ -10,8 +10,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Loader2, CheckCircle2, User, Lock, Sparkles, Wrench, Glasses } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const productionHostname = import.meta.env.VITE_PRODUCTION_HOSTNAME as string | undefined;
-const isProduction = Boolean(productionHostname && window.location.hostname === productionHostname);
+/** Normalize env value to hostname only (strip protocol/path so "https://learnkorean.kaliolsen.com" matches window.location.hostname). */
+function normalizeProductionHostname(raw: string | undefined): string | undefined {
+  if (!raw?.trim()) return undefined;
+  const s = raw.trim();
+  try {
+    if (s.includes('://')) return new URL(s).hostname;
+    return s;
+  } catch {
+    return s;
+  }
+}
+const productionHostnameRaw = import.meta.env.VITE_PRODUCTION_HOSTNAME as string | undefined;
+const productionHostname = normalizeProductionHostname(productionHostnameRaw);
+const isProduction = Boolean(productionHostname && typeof window !== 'undefined' && window.location.hostname === productionHostname);
 
 // #region agent log
 function logAuthDevCheck() {
