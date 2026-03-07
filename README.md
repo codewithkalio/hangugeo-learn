@@ -28,7 +28,10 @@ Hangugeo Learn is a custom-built web app that lets users study Korean vocabulary
 git clone https://github.com/codewithkalio/hangugeo-learn.git
 cd hangugeo-learn
 npm install
+cp .env.example .env
 ```
+
+Edit `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from your [Supabase project](https://supabase.com/dashboard) (Settings → API). Do not commit `.env`.
 
 ### Run
 
@@ -67,6 +70,20 @@ The app is a React frontend deployed on Vercel, backed by Supabase for authentic
 2. **Don't use the same model to build it and audit it.** If you ask the same model that wrote your code to audit it for security flaws, you're working against yourself. Clear the chat context before switching to a scrutiny role — or better yet, use a different model entirely. A fresh model with no prior context will spot what the original model rationalized away.
 
 3. **Observability requires intentional data hygiene.** Cursor wired up PostHog quickly but never asked whether I wanted to sanitize user session data before capturing it. I had to manually engineer a data sanitization layer after the fact.
+
+## Making the repo public
+
+If this repo was ever private and contained real Supabase keys in git history:
+
+1. **Rotate the anon (public) key**  
+   Supabase Dashboard → Project Settings → API → Regenerate the `anon` `public` key.  
+   Update `VITE_SUPABASE_PUBLISHABLE_KEY` in your `.env` and in Vercel (or other host) so the app keeps working. The old key in history will no longer work.
+
+2. **Rotate the service_role key if it was ever committed**  
+   Same page → Regenerate `service_role`. Use the new key only in secure server-side or CI contexts; never in the frontend or in the repo.
+
+3. **Ensure `.env` is gitignored**  
+   Only `.env.example` (with placeholders) should be committed.
 
 ## Next Steps
 
