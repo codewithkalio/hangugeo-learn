@@ -2,7 +2,7 @@
 
 A Korean language flashcard app with spaced repetition, multi-round reinforcement drills, and a neumorphic SoftUI design system.
 
-**→ [Live Demo](https://learnkorean.kaliolsen.com)** _(portfolio piece — not open for public accounts)_
+**→ [Live Demo](https://learnkorean.kaliolsen.com)** 
 
 ---
 
@@ -31,7 +31,7 @@ React 18 · TypeScript · Vite · Tailwind CSS · Framer Motion · Supabase · P
 
 ## Local Development
 
-> ⚠️ This project is a personal portfolio piece and is not open for contributions or public accounts.
+> ⚠️ This project is a personal portfolio piece and is not open for contributions.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
