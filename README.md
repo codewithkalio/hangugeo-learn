@@ -8,7 +8,7 @@ A mobile-friendly Korean flashcard app with personal notes, audio pronunciation,
 
 ## The Problem
 
-Korean isn't just vocabulary — it's context. The same word changes its form depending on who you're talking to, how formal the situation is, and what level of respect is expected. Most flashcard apps weren't built for that nuance. Learners need a way to add personal notes, hear words spoken aloud, practice typing with a real Korean keyboard, and reinforce their weakest words — four gaps that no single app addressed well.
+A few months into learning the Korean language I realized that Korean isn't just vocabulary — it's context. The same word changes its form depending on who you're talking to, how formal the situation is, and what level of respect is expected. Most flashcard apps weren't built for that nuance. Learners need a way to add personal notes, hear words spoken aloud, practice typing with a real Korean keyboard, and reinforce their weakest words — four gaps that no single app addressed well.
 
 ## The Solution
 
