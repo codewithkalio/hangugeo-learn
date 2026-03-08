@@ -1,29 +1,8 @@
-import { z } from 'zod';
+import { flashcardInputSchema } from '@/lib/flashcardSanitize';
 
-/** Strip HTML tags, javascript: protocols, and on* event handlers */
-function stripHtml(input: string): string {
-  return input
-    .replace(/<[^>]*>/g, '')                    // remove HTML tags
-    .replace(/javascript\s*:/gi, '')            // remove javascript: protocol
-    .replace(/\bon\w+\s*=/gi, '')               // remove on* event handlers
-    .replace(/\s{2,}/g, ' ')                    // collapse whitespace
-    .trim();
-}
+export const csvRowSchema = flashcardInputSchema;
 
-export const csvRowSchema = z.object({
-  korean: z.string().trim().min(1, 'korean is required').max(500).transform(stripHtml),
-  english: z.string().trim().min(1, 'english is required').max(500).transform(stripHtml),
-  category: z.preprocess(
-    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-    z.string().trim().max(100).transform(stripHtml).optional()
-  ),
-  note: z.preprocess(
-    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-    z.string().trim().max(1000).transform(stripHtml).optional()
-  ),
-});
-
-export type SanitizedCsvRow = z.output<typeof csvRowSchema>;
+export type SanitizedCsvRow = import('@/lib/flashcardSanitize').SanitizedFlashcardInput;
 
 /** Parse a CSV string into an array of row objects keyed by header names */
 export function parseCsv(text: string): Record<string, string>[] {

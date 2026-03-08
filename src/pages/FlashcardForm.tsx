@@ -9,6 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { FLASHCARD_FIELD_LIMITS, flashcardInputSchema } from '@/lib/flashcardSanitize';
 
 const hasHangul = (str: string) => /[\u3131-\uD79D]/.test(str);
 
@@ -35,26 +36,38 @@ export default function FlashcardForm() {
   }, []);
 
   const handleSave = async () => {
-    if (!korean.trim() || !english.trim()) {
-      toast.error('Both fields are required');
+    if (isSaving) return;
+
+    const rawCategory = category === '__new__'
+      ? newCategory
+      : category === 'none'
+        ? ''
+        : category;
+    const validationResult = flashcardInputSchema.safeParse({
+      korean,
+      english,
+      category: rawCategory,
+      note,
+    });
+
+    if (!validationResult.success) {
+      toast.error(validationResult.error.issues[0]?.message ?? 'Please check your inputs and try again');
       return;
     }
-    if (isSaving) return;
+
     setIsSaving(true);
 
-    const finalCategory = category === '__new__' ? newCategory.trim() : category;
-    if (category === '__new__' && newCategory.trim()) {
-      addCategory(newCategory.trim());
+    const sanitizedCard = validationResult.data;
+    if (category === '__new__' && sanitizedCard.category) {
+      addCategory(sanitizedCard.category);
     }
-
-    const finalNote = note.trim() || undefined;
 
     try {
       if (isEdit && id) {
-        await updateFlashcard(id, { korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
+        await updateFlashcard(id, sanitizedCard);
         toast.success('Card updated! ✏️');
       } else {
-        await addFlashcard({ korean: korean.trim(), english: english.trim(), category: finalCategory || undefined, note: finalNote });
+        await addFlashcard(sanitizedCard);
         toast.success('Card created! 🎉');
       }
       navigate('/cards');
@@ -86,6 +99,7 @@ export default function FlashcardForm() {
             value={korean}
             onChange={e => setKorean(e.target.value)}
             placeholder="한국어 단어..."
+            maxLength={FLASHCARD_FIELD_LIMITS.korean}
             className="soft-inset border-none bg-background text-lg"
           />
         </div>
@@ -97,6 +111,7 @@ export default function FlashcardForm() {
             value={english}
             onChange={e => setEnglish(e.target.value)}
             placeholder="English word..."
+            maxLength={FLASHCARD_FIELD_LIMITS.english}
             className="soft-inset border-none bg-background text-lg"
           />
         </div>
@@ -121,6 +136,7 @@ export default function FlashcardForm() {
               value={newCategory}
               onChange={e => setNewCategory(e.target.value)}
               placeholder="Category name..."
+              maxLength={FLASHCARD_FIELD_LIMITS.category}
               className="soft-inset border-none bg-background"
             />
           )}
@@ -134,10 +150,10 @@ export default function FlashcardForm() {
               value={note}
               onChange={e => setNote(e.target.value)}
               placeholder="Add a short note..."
-              maxLength={65}
+              maxLength={FLASHCARD_FIELD_LIMITS.note}
               className="soft-inset border-none bg-background text-lg pr-12"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/65</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{note.length}/{FLASHCARD_FIELD_LIMITS.note}</span>
           </div>
         </div>
 

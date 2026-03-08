@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Flashcard, DrillResult } from '@/lib/types';
+import { categoryNameSchema, flashcardInputSchema, flashcardUpdateSchema } from '@/lib/flashcardSanitize';
 
 async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
   for (let i = 0; i <= retries; i++) {
@@ -102,11 +103,12 @@ export function useAppData() {
   // ── Mutations ──
   const addFlashcardMut = useMutation({
     mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
-      console.log('[addFlashcard] Inserting card:', { korean: card.korean, english: card.english, category: card.category, note: card.note });
+      const sanitizedCard = flashcardInputSchema.parse(card);
+      console.log('[addFlashcard] Inserting card:', sanitizedCard);
       return retryFetch(async () => {
         const { data, error } = await supabase
           .from('flashcards')
-          .insert({ user_id: userId!, korean: card.korean, english: card.english, category: card.category ?? null, note: card.note ?? null } as any)
+          .insert({ user_id: userId!, korean: sanitizedCard.korean, english: sanitizedCard.english, category: sanitizedCard.category ?? null, note: sanitizedCard.note ?? null } as any)
           .select()
           .single();
         if (error) {
@@ -123,13 +125,15 @@ export function useAppData() {
 
   const updateFlashcardMut = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Flashcard> }) => {
-      console.log('[updateFlashcard] Updating card:', { id, updates });
+      const sanitizedUpdates = flashcardUpdateSchema.parse(updates);
+      console.log('[updateFlashcard] Updating card:', { id, updates: sanitizedUpdates });
       return retryFetch(async () => {
         const mapped: Record<string, unknown> = {};
-        if (updates.korean !== undefined) mapped.korean = updates.korean;
-        if (updates.english !== undefined) mapped.english = updates.english;
-        if (updates.category !== undefined) mapped.category = updates.category ?? null;
-        if (updates.note !== undefined) mapped.note = updates.note ?? null;
+        if (Object.prototype.hasOwnProperty.call(updates, 'korean')) mapped.korean = sanitizedUpdates.korean;
+        if (Object.prototype.hasOwnProperty.call(updates, 'english')) mapped.english = sanitizedUpdates.english;
+        if (Object.prototype.hasOwnProperty.call(updates, 'category')) mapped.category = sanitizedUpdates.category ?? null;
+        if (Object.prototype.hasOwnProperty.call(updates, 'note')) mapped.note = sanitizedUpdates.note ?? null;
+        if (Object.keys(mapped).length === 0) return;
         const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
         if (error) {
           console.error('[updateFlashcard] Supabase error:', JSON.stringify(error));
@@ -152,7 +156,8 @@ export function useAppData() {
 
   const addCategoryMut = useMutation({
     mutationFn: async (name: string) => {
-      const { error } = await supabase.from('categories').insert({ user_id: userId!, name } as any);
+      const sanitizedName = categoryNameSchema.parse(name);
+      const { error } = await supabase.from('categories').insert({ user_id: userId!, name: sanitizedName } as any);
       if (error && error.code !== '23505') throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories', userId] }),
