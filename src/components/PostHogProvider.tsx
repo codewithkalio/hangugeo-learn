@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDemoMode } from '@/contexts/DemoContext';
 import { posthog } from '@/lib/posthog';
+import { capturePageView } from '@/lib/analytics';
 
 function getOrCreateDemoSessionId(): string {
   const key = 'posthog-demo-session-id';
@@ -35,9 +36,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   // Track page views on route change
   useEffect(() => {
-    posthog.capture('$pageview', {
-      $current_url: window.location.href,
-    });
+    capturePageView(location.pathname);
   }, [location.pathname]);
 
   return <>{children}</>;

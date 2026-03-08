@@ -48,6 +48,12 @@ npm run dev
 
 The app is a React frontend deployed on Vercel, backed by Supabase for authentication, Postgres database, and row-level security. RLS policies enforce per-user data tenancy so each learner only sees their own cards and progress. The Speech Synthesis API converts text to spoken Korean using voices native to the user's device. PostHog provides product analytics with a custom data sanitization layer to protect user session data. A custom image API handles rendering images for abstract vocabulary concepts.
 
+## Analytics Policy
+
+PostHog is configured for explicit, sanitized product analytics rather than broad client-side capture. The recommended event inventory is intentionally small: `flashcard_saved`, `flashcard_save_failed`, `flashcard_deleted`, `category_created`, `drill_completed`, `$pageview`, and `$exception`.
+
+Do not send flashcard text, notes, raw search queries, full URLs with query params, raw console logs, or full error messages/stacks. Prefer outcome-oriented properties like `mode`, `has_category`, `has_note`, `correct_count`, `error_type`, and `is_network_error`.
+
 ## Tradeoffs and Decisions
 
 | DECISION AREA | CHOSEN | REJECTED | REASONING |

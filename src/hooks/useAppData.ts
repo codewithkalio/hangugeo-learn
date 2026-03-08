@@ -2,8 +2,24 @@ import { useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  captureCategoryCreated,
+  captureDrillCompleted,
+  captureFlashcardDeleted,
+  captureFlashcardSaved,
+  captureFlashcardSaveFailed,
+} from '@/lib/analytics';
 import { Flashcard, DrillResult } from '@/lib/types';
 import { categoryNameSchema, flashcardInputSchema, flashcardUpdateSchema } from '@/lib/flashcardSanitize';
+
+function debugConsole(method: 'log' | 'error', message: string, details?: unknown) {
+  if (!import.meta.env.DEV) return;
+  if (details === undefined) {
+    console[method](message);
+    return;
+  }
+  console[method](message, details);
+}
 
 async function retryFetch<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
   for (let i = 0; i <= retries; i++) {
@@ -104,7 +120,7 @@ export function useAppData() {
   const addFlashcardMut = useMutation({
     mutationFn: async (card: Omit<Flashcard, 'id' | 'createdAt' | 'correctCount' | 'incorrectCount' | 'confidenceScore' | 'weight' | 'consecutiveFluent'>) => {
       const sanitizedCard = flashcardInputSchema.parse(card);
-      console.log('[addFlashcard] Inserting card:', sanitizedCard);
+      debugConsole('log', '[addFlashcard] Inserting card:', sanitizedCard);
       return retryFetch(async () => {
         const { data, error } = await supabase
           .from('flashcards')
@@ -112,21 +128,27 @@ export function useAppData() {
           .select()
           .single();
         if (error) {
-          console.error('[addFlashcard] Supabase error:', JSON.stringify(error));
+          debugConsole('error', '[addFlashcard] Supabase error:', JSON.stringify(error));
           throw error;
         }
-        console.log('[addFlashcard] Success:', data);
+        debugConsole('log', '[addFlashcard] Success:', data);
         return data;
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
-    onError: (error) => console.error('[addFlashcard] Mutation error:', JSON.stringify(error)),
+    onSuccess: (_data, card) => {
+      queryClient.invalidateQueries({ queryKey: ['flashcards', userId] });
+      captureFlashcardSaved('create', card);
+    },
+    onError: (error) => {
+      debugConsole('error', '[addFlashcard] Mutation error:', JSON.stringify(error));
+      captureFlashcardSaveFailed('create', error);
+    },
   });
 
   const updateFlashcardMut = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Flashcard> }) => {
       const sanitizedUpdates = flashcardUpdateSchema.parse(updates);
-      console.log('[updateFlashcard] Updating card:', { id, updates: sanitizedUpdates });
+      debugConsole('log', '[updateFlashcard] Updating card:', { id, updates: sanitizedUpdates });
       return retryFetch(async () => {
         const mapped: Record<string, unknown> = {};
         if (Object.prototype.hasOwnProperty.call(updates, 'korean')) mapped.korean = sanitizedUpdates.korean;
@@ -136,14 +158,20 @@ export function useAppData() {
         if (Object.keys(mapped).length === 0) return;
         const { error } = await supabase.from('flashcards').update(mapped as any).eq('id', id);
         if (error) {
-          console.error('[updateFlashcard] Supabase error:', JSON.stringify(error));
+          debugConsole('error', '[updateFlashcard] Supabase error:', JSON.stringify(error));
           throw error;
         }
-        console.log('[updateFlashcard] Success');
+        debugConsole('log', '[updateFlashcard] Success');
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
-    onError: (error) => console.error('[updateFlashcard] Mutation error:', JSON.stringify(error)),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['flashcards', userId] });
+      captureFlashcardSaved('update', variables.updates);
+    },
+    onError: (error) => {
+      debugConsole('error', '[updateFlashcard] Mutation error:', JSON.stringify(error));
+      captureFlashcardSaveFailed('update', error);
+    },
   });
 
   const deleteFlashcardMut = useMutation({
@@ -151,16 +179,26 @@ export function useAppData() {
       const { error } = await supabase.from('flashcards').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['flashcards', userId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['flashcards', userId] });
+      captureFlashcardDeleted();
+    },
   });
 
   const addCategoryMut = useMutation({
     mutationFn: async (name: string) => {
       const sanitizedName = categoryNameSchema.parse(name);
       const { error } = await supabase.from('categories').insert({ user_id: userId!, name: sanitizedName } as any);
-      if (error && error.code !== '23505') throw error;
+      if (error) {
+        if (error.code === '23505') return 'duplicate' as const;
+        throw error;
+      }
+      return 'created' as const;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories', userId] }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['categories', userId] });
+      captureCategoryCreated('flashcard_form', result === 'duplicate');
+    },
   });
 
   const addDrillResultMut = useMutation({
@@ -189,9 +227,11 @@ export function useAppData() {
         } as any).eq('id', c.cardId);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_data, result) => {
       queryClient.invalidateQueries({ queryKey: ['flashcards', userId] });
       queryClient.invalidateQueries({ queryKey: ['drillResults', userId] });
+      const correctCount = result.cards.filter(c => c.confidence >= 3).length;
+      captureDrillCompleted(result, correctCount);
     },
   });
 

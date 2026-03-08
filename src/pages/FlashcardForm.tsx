@@ -72,7 +72,9 @@ export default function FlashcardForm() {
       }
       navigate('/cards');
     } catch (error) {
-      console.error('[FlashcardForm] Save failed:', JSON.stringify(error));
+      if (import.meta.env.DEV) {
+        console.error('[FlashcardForm] Save failed:', JSON.stringify(error));
+      }
       toast.error('Failed to save card — please try again');
     } finally {
       setIsSaving(false);

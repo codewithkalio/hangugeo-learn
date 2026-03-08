@@ -14,10 +14,9 @@ export function initPostHog() {
   }
   posthog.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
-    autocapture: true,
+    autocapture: false,
     capture_pageview: false, // We handle this manually in the provider
     capture_pageleave: true,
-    enable_recording_console_log: true,
     session_recording: {
       recordCrossOriginIframes: false,
     },
