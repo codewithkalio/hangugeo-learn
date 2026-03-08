@@ -20,7 +20,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-if (typeof window !== 'undefined') {
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   // #region agent log
   fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H1|H4',location:'src/integrations/supabase/client.ts:clientInit',message:'Supabase client initialized',data:{supabaseHost:new URL(SUPABASE_URL).host,origin:window.location.origin,hostname:window.location.hostname,hasPublishableKey:Boolean(SUPABASE_PUBLISHABLE_KEY)},timestamp:Date.now()})}).catch(()=>{});
   // #endregion
