@@ -17,19 +17,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        // #region agent log
-        fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H3|H4',location:'src/contexts/AuthContext.tsx:onAuthStateChange',message:'Auth state changed',data:{event,hasSession:Boolean(session),hasAccessToken:Boolean(session?.access_token),path:typeof window!=='undefined'?window.location.pathname:null,search:typeof window!=='undefined'?window.location.search:null,hash:typeof window!=='undefined'?window.location.hash:null},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
+      (_event, session) => {
         setSession(session);
         setLoading(false);
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H3|H4',location:'src/contexts/AuthContext.tsx:getSession',message:'Initial session loaded',data:{hasSession:Boolean(session),hasAccessToken:Boolean(session?.access_token),path:typeof window!=='undefined'?window.location.pathname:null,search:typeof window!=='undefined'?window.location.search:null,hash:typeof window!=='undefined'?window.location.hash:null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setSession(session);
       setLoading(false);
     });

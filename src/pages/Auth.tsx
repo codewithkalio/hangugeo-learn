@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,12 +41,6 @@ export default function Auth() {
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
   const captchaRef = useRef<HCaptcha>(null);
 
-  useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H1|H3|H5',location:'src/pages/Auth.tsx:Auth.useEffect',message:'Auth page mounted',data:{hostname:window.location.hostname,origin:window.location.origin,path:window.location.pathname,search:window.location.search,hash:window.location.hash,productionHostname:productionHostname ?? null,isProduction},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, []);
-
   const resetCaptcha = () => {
     setCaptchaToken(undefined);
     captchaRef.current?.resetCaptcha();
@@ -80,13 +74,7 @@ export default function Auth() {
         },
       };
 
-      // #region agent log
-      fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H1|H2',location:'src/pages/Auth.tsx:handleSubmit:beforeSignInWithOtp',message:'Sending magic link',data:{hostname:window.location.hostname,origin:window.location.origin,isProduction,productionHostname:productionHostname ?? null,redirectTo:otpOptions.options?.emailRedirectTo ?? null,hasCaptchaSiteKey:Boolean(captchaSiteKey),hasCaptchaToken:Boolean(captchaToken),isSignUp},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       const { error } = await supabase.auth.signInWithOtp(otpOptions);
-      // #region agent log
-      fetch('http://127.0.0.1:7790/ingest/9474baa9-f3a8-4c4e-9a88-acca5bb599a0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'643bfc'},body:JSON.stringify({sessionId:'643bfc',runId:'initial',hypothesisId:'H2',location:'src/pages/Auth.tsx:handleSubmit:afterSignInWithOtp',message:'Magic link response received',data:{hasError:Boolean(error),errorMessage:error?.message ?? null},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       setSending(false);
       if (captchaSiteKey) resetCaptcha();
       if (error) {
